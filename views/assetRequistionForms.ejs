@@ -153,6 +153,14 @@
                             plane.setHours(plane.getHours() + 5);
                             plane.setMinutes(plane.getMinutes() + 30);
                             let planDt = plane.toLocaleString().split(',')[0];
+
+                            let rec = new Date(assetDetailsRecord.date_of_receiving_goods__c);
+                            rec.setHours(rec.getHours() + 5);
+                            rec.setMinutes(rec.getMinutes() + 30);
+                            let receiveDate = rec.toLocaleString().split(',')[0];
+
+
+
                             let actu = new Date(assetDetailsRecord.requested_closure_actual_date__c);
                             actu.setHours(actu.getHours() + 5);
                             actu.setMinutes(actu.getMinutes() + 30);
@@ -275,21 +283,21 @@
 
                                     assetDetailsTableRows += '<tr>';
                                     assetDetailsTableRows += '<td><strong>Status<strong></td>';
-                                    assetDetailsTableRows += '<td></td>';
+                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.status__c+'</td>';
                                     assetDetailsTableRows += '<td><strong>Payment Received Acknowledgement<strong></td>';
-                                    assetDetailsTableRows += '<td></td>';
+                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.payment_received_acknowledgement__c+'</td>';
                                     assetDetailsTableRows += '</tr>';   
                     
                                     assetDetailsTableRows += '<tr>';
                                     assetDetailsTableRows += '<td><strong>Receiver Name<strong></td>';
-                                    assetDetailsTableRows += '<td></td>';
+                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.receiver_name__c+'</td>';
                                     assetDetailsTableRows += '<td><strong>Received Quantity<strong></td>';
-                                    assetDetailsTableRows += '<td></td>';
+                                    assetDetailsTableRows += '<td>'+assetDetailsRecord.received_quantity_goods__c+'</td>';
                                     assetDetailsTableRows += '</tr>';   
         
                                     assetDetailsTableRows += '<tr>';
                                     assetDetailsTableRows += '<td><strong>Date Of Receiving (Goods)<strong></td>';
-                                    assetDetailsTableRows += '<td></td>';
+                                    assetDetailsTableRows += '<td>'+receiveDate+'</td>';
                                     assetDetailsTableRows += '<td><strong><strong></td>';
                                     assetDetailsTableRows += '<td></td>';
                                     assetDetailsTableRows += '</tr>';
@@ -506,13 +514,17 @@
         <div class="form-group">  
             <div class="row">
                 <div class="col-md-6">
-                    <label for="gst">GST</label>
-                    <input type="text" class="form-control" id="gst"   name="gst" required>
+                    <label for="act">Activity code</label>
+                    <input type="text" class="form-control" id="act"   name="act" >
                 </div>
 
               <div class="col-md-6">
-                    <label for="act">Activity code </label>
-                    <input type="text" class="form-control" id="act" >
+                  <!--   <label for="act">Activity code </label> -->
+                  <!--   <input type="text" class="form-control" id="act" > -->
+                  <label for="submittedBy">Submitted By</label>
+                  <select id="submittedBy" name="submittedBy" class="form-control">
+                       <option value="<%= objUser.sfid %>"><%= objUser.name %></option> 
+                  </select>
                 </div>
           </div>
         </div> 
@@ -520,10 +532,10 @@
         <div class="form-group">  
             <div class="row">
               <div class="col-md-6">
-                    <label for="submittedBy">Submitted By</label>
+                   <!--  <label for="submittedBy">Submitted By</label>
                     <select id="submittedBy" name="submittedBy" class="form-control">
                          <option value="<%= objUser.sfid %>"><%= objUser.name %></option> 
-                    </select>
+                    </select> -->
               </div>
 
           </div>
@@ -832,14 +844,14 @@
               <div class="form-group">
                   <div class="row">
                     <div class="col-md-6">
-                      <label for="activityCode">Actity Code</label>
+                      <label for="activityCode">Activity Code</label>
                       <input type="text" class="form-control" id="activityCode"  value=""   name="activityCode" >
                     </div>
                     <div class="col-md-6">
                       <label for="paymentStatus"></label>Payment Status</label>
                      <!--  <input type="text" class="form-control" id="paymentStatus" value=""   name="paymentStatus" >         -->
                      <select id="paymentStatus" class="custom-select custom-select-sm form-control" name="paymentStatus">
-                        <option value="none">--None--</option>
+                        <option value="">--None--</option>
                         <option value="Released">Released</option>
                         <option value="Rejected">Rejected</option>
                    </select>
@@ -862,18 +874,18 @@
                     <div class="col-md-6">
                        <label for="status">Status</label>
                        <select id="status" class="custom-select custom-select-sm form-control" name="status">
-                            <option value="null">--None--</option>
-                            <option value="null">Open</option>
-                            <option value="null">Closed</option>
+                            <option value="">--None--</option>
+                            <option value="Open">Open</option>
+                            <option value="Closed">Closed</option>
                        </select>
                     </div>
 
                     <div class="col-md-6">
                         <label for="amount">Payment Received Acknowledgement</label>
                         <select id="payement" class="custom-select custom-select-sm form-control" name="payement">
-                            <option value="null">--None--</option>
-                            <option value="null">Received</option>
-                            <option value="null">Not Received</option>
+                            <option value="">--None--</option>
+                            <option value="Received">Received</option>
+                            <option value="Not Received">Not Received</option>
                         </select> 
                     </div>
                   </div>     
@@ -901,7 +913,7 @@
                           </div>
       
                           <div class="col-md-6">
-                            <input type="hide" class="form-control" id="assetid" value=""   name="assetid" >
+                            <input type="hidden" class="form-control" id="assetid" value=""  name="assetid" >
                             
                           </div>
                         </div>     
@@ -1063,7 +1075,7 @@
                   var assetId = document.getElementById('assetId').value;
                    console.log('assetId  : '+assetId);
                   
-                  alert('Save Button Clicked !' +'parentId is '+assetId);
+                  alert('Save Button Clicked !' );
                   var $inputs = $('#editAssetForm :input');
 
                   // not sure if you wanted this, but I thought I'd add it.
@@ -1082,9 +1094,17 @@
                 })
                 .done((response) => {
                       console.log('resonse   :'+response);
+                     
                 })
                 .fail((jqXHR, status, error) => {
                       console.log('jqXHR  '+JSON.stringify(jqXHR));
+                      alert('data succesfully inserted ');
+                      if(jqXHR.responseText=='succesfully inserted'){
+                        alert('data succesfully inserted ');
+                        $('#assetRequisitionEditModal').modal('hide');
+
+                      }
+                      
                 })                        
      })      
 

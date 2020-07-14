@@ -251,7 +251,7 @@
                                 htmlTable += '<td><strong>Procurement- IT ID</strong></td>';
                                 htmlTable += '<td>'+record.procitname+'</td>';
                                 htmlTable += '<td><strong>ImpaneledVendor Name</strong></td>';
-                                htmlTable += '<td>'+'<a href="#" class="vendorDetTag" id="'+record.impaneled_vendor__c+'" >'+record.vendername+'</a>'+'</td>';
+                                htmlTable += '<td>'+'<a target="_blank" href="#" class="vendorDetTag" id="'+record.impaneled_vendor__c+'" >'+record.vendername+'</a>'+'</td>';
                          
                             htmlTable += '</tr>';
                             htmlTable += '<tr>';
@@ -275,14 +275,14 @@
                           htmlTable += '<tr>';
                             htmlTable += '<td><strong>Quote1</strong></td>';
                             if(record.quote1__c!="demo1"){
-                            htmlTable += '<td>'+'<a href="'+record.quote1__c+'" target="_blank">Click to View Quote1</a></td>';
+                            htmlTable += '<td>'+'<a href="'+record.quote1__c+'" target="_blank">Click to View Quote</a></td>';
                             }
                             else{
                               htmlTable += '<td></td>';
                             }
                             htmlTable += '<td><strong>Quote2</strong></td>';
                             if(record.quote2__c!="demo2"){
-                            htmlTable += '<td>'+'<a href="'+record.quote2__c+'" target="_blank">Click to View Quote2</a></td>';
+                            htmlTable += '<td>'+'<a href="'+record.quote2__c+'" target="_blank">Click to View Quote</a></td>';
                             }
                             else{
                               htmlTable+= '<td></td>';
@@ -291,7 +291,7 @@
                            htmlTable += '<tr>';
                               htmlTable += '<td><strong>Quote3</strong></td>';
                               if(record.quote3__c!="demo3"){
-                              htmlTable += '<td>'+'<a href="'+record.quote3__c+'" target="_blank">Click to View Quote3</a></td>';
+                              htmlTable += '<td>'+'<a href="'+record.quote3__c+'" target="_blank">Click to View Quote</a></td>';
                               }
                               else{
                                 htmlTable +='<td></td>';
@@ -339,7 +339,8 @@
             event.stopImmediatePropagation();
             let vendorId = this.id;
             alert('vendor id '+vendorId);
-            location.href = "/procurement/getVondor/"+vendorId;             
+           // location.href = "/procurement/getVondor/"+vendorId;
+            location.href = "/procurement/getvendorListView/";             
         })
       }
 
