@@ -178,13 +178,13 @@ router.post('/insertAsssetForm',(request,response)=>{
     let planDate=request.body.planDate;
     let actualDate=request.body.actualDate;
     console.log('Form Value =>'+JSON.stringify(body));
-   const{assetRequisitionName,projectName,gst,submittedBy}=request.body;
+   const{assetRequisitionName,projectName,submittedBy,act}=request.body;
    console.log('Asset name=> '+assetRequisitionName);
    console.log('Asset projectName=> '+projectName);
    console.log('Asset actualDate=> '+actualDate);
    console.log('Asset planDate=> '+planDate);
-   console.log('Asset gst=> '+gst);
    console.log('Asset spocApproval=> '+submittedBy);
+   console.log('Activity code '+act);
   // console.log('Asset spocApproval=> '+spocApproval);
   // console.log('availableInStock=> '+availableInStock);
    if(planDate==''){
@@ -206,10 +206,10 @@ if(result.error){
     response.send(result.error.details[0].context.label);    
 }
 else{
-   let query ='INSERT INTO salesforce.Asset_Requisition_Form__c (name,Project_Department__c,Requested_Closure_Actual_Date__c,Requested_Closure_Plan_Date__c,GST__c,Submitted_By_Heroku_User__c) values ($1,$2,$3,$4,$5,$6)';
+   let query ='INSERT INTO salesforce.Asset_Requisition_Form__c (name,Project_Department__c,Requested_Closure_Actual_Date__c,Requested_Closure_Plan_Date__c,Activity_Code__c,Submitted_By_Heroku_User__c) values ($1,$2,$3,$4,$5,$6)';
    console.log('asset Insert Query= '+query);
    pool
-   .query(query,[assetRequisitionName,projectName,actualDate,planDate,gst,submittedBy,spocApproval,availableInStock])
+   .query(query,[assetRequisitionName,projectName,actualDate,planDate,act,submittedBy])
    .then((assetQueryResult) => {     
             console.log('assetQueryResult.rows '+JSON.stringify(assetQueryResult));
             response.send('Successfully Inserted');
@@ -223,8 +223,11 @@ else{
 
 router.post('/updateasset',(request,response)=>{
     let body = request.body;
+    let closureActualDate=request.body.closureActualDate;
+    let closurePlanDate =request.body.closurePlanDate;
+    let goodsDate=request.body.goodsDate;
     console.log('body  : '+JSON.stringify(body));
-    const { assetName, closureActualDate,closurePlanDate,activityCode,paymentStatus,status,payement,receiverName,receivedQuantity,goodsDate,assetid} = request.body;
+    const { assetName,activityCode,paymentStatus,status,payement,receiverName,receivedQuantity,assetid} = request.body;
     console.log('assetName    '+assetName);
     console.log('closureActualDate  '+closureActualDate);
     console.log('closurePlanDate  '+closurePlanDate);
@@ -236,6 +239,21 @@ router.post('/updateasset',(request,response)=>{
     console.log('receivedQuantity  '+receivedQuantity);
     console.log('goodsDate  '+goodsDate);
     console.log('assetid  '+assetid);
+    if(closurePlanDate==''){
+        console.log('plan');
+        closurePlanDate='1970-01-02';
+    }
+    if(closureActualDate==''){
+        console.log('dsclosure'+closureActualDate+'aa');
+        closureActualDate='1970-01-02'; 
+    }
+    if(goodsDate==''){
+        console.log('dsjjd goods ');
+        goodsDate='1970-01-02';
+    }
+
+    console.log('goodsDate'+goodsDate);
+
     let updateQuerry = 'UPDATE salesforce.Asset_Requisition_Form__c SET '+
     'Name = \''+assetName+'\', '+
     'Requested_Closure_Actual_Date__c = \''+closureActualDate+'\', '+
@@ -746,6 +764,7 @@ router.get('/itProcurementList',(request,response)=>{
 })
 router.get('/getProcurementITDetail',(request,response)=>{
       let procurementId=request.query.procurementId;
+      var procDetail={};
         console.log('getProcurementITDetail Id='+procurementId);
         let qry='SELECT procIT.sfid,procIT.Name as procItName,procIT.Is_released_from_stock__c,procIT.Others__c,procIT.state__c,procIT.district__c,procIT.Justification__c,procIT.Number_of_quotes__c,procIT.Per_Unit_Cost__c,procIT.Unit__c,procIT.Quote1__c,procIT.Quote2__c,procIT.Quote3__c,procIT.Approvers__c ,procIT.Items__c ,procIT.Product_Service_specification__c,vend.name as venderName,procIT.Quantity__c, procIT.Budget__c,procIT.Impaneled_Vendor__c '+
         'FROM salesforce.Product_Line_Item_IT__c procIT '+
@@ -757,7 +776,18 @@ router.get('/getProcurementITDetail',(request,response)=>{
     .query(qry,[procurementId])
     .then((querryResult)=>{
         console.log('QuerryResult=>'+JSON.stringify(querryResult.rows));
-        response.send(querryResult.rows);
+        procDetail.proc=querryResult.rows;
+        pool.query('SELECT sfid,Name,Timely_submissions_of_Deliverables_Goods__c,Work_Quality_Goods_Quality__c,Quyantiut__c,Issue_Knowledge_Expertise__c,Procurement_IT__c FROM salesforce.Feedbacks_IT__c WHERE Procurement_IT__c=$1',[procurementId])
+                .then((queryResult)=>{
+                         console.log('queryResult'+JSON.stringify(queryResult));
+                         procDetail.feedback=queryResult.rows;
+                         console.log('procDetail list :'+JSON.stringify(procDetail));
+                         response.send(procDetail);
+                })
+                .catch((error)=>{
+                    console.log('erroror '+JSON.stringify(error.stack));
+                })
+    
     })
     .catch((querryError)=>{
         console.log('QuerrError '+querryError.stack);
@@ -1238,7 +1268,7 @@ response.send(itemdescriptionQueryy.rows);
     response.send(error);
 })
 })
-router.post('/updateItemescription',(request,resposne)=>{
+router.post('/updateItemescription',(request,response)=>{
     let body = request.body;
     console.log('body  : '+JSON.stringify(body));
     const { item, cate,cost,unit,other,quote,hide} = request.body;
@@ -1278,6 +1308,14 @@ router.get('/createFeedback/:procid',verify,(request,response)=>{
     response.render('createFeedbackform',{procid,objUser});
 
 })
+router.get('/createFeedbackIT/:procid',verify,(request,response)=>{
+    let procid=request.params.procid;
+    let objUser=request.user;
+    console.log('obhUser =>'+objUser);
+    console.log('parentId '+procid);
+    response.render('createFeedbackITform',{procid,objUser});
+})
+
 router.get('/getfeedback/:procid',verify,(request,response)=>{
     let procid=request.params.procid;
     let objUser=request.user;
@@ -1289,7 +1327,7 @@ router.get('/getfeedback/:procid',verify,(request,response)=>{
 router.get('/getFeedbacklist',verify,(request,response)=>{
     let parentid=request.query.parentId;
     console.log('parentid '+parentid);
-    let qry = 'SELECT sfid,Name,Timely_submissions_of_all_Deliverables__c,Work_Quality_Goods_Quality__c,Issue_Knowledge_Expertise__c,Procurement_Non_IT__c FROM salesforce.Feedback__c WHERE Procurement_Non_IT__c=$1';
+    let qry = 'SELECT sfid,Name,quantity_requested_vs_received__c,Timely_submissions_of_all_Deliverables__c,Work_Quality_Goods_Quality__c,Issue_Knowledge_Expertise__c,Procurement_Non_IT__c FROM salesforce.Feedback__c WHERE Procurement_Non_IT__c=$1';
     console.log('qry  =>'+qry)
      pool.query(qry,[parentid])
      .then((feedbackqueryresult) => {
@@ -1303,7 +1341,8 @@ router.get('/getFeedbacklist',verify,(request,response)=>{
               obj.time=eachRecord.timely_submissions_of_all_deliverables__c;
               obj.quality=eachRecord.work_quality_goods_quality__c;
               obj.issue = eachRecord.issue_knowledge_expertise__c;
-              obj.editAction = '<button href="#" class="btn btn-primary editVendor" id="'+eachRecord.sfid+'" >Edit</button>'
+              obj.quant =eachRecord.quantity_requested_vs_received__c;
+              obj.editAction = '<button href="#" class="btn btn-primary feededit" id="'+eachRecord.sfid+'" >Edit</button>'
               i= i+1;
               modifiedList.push(obj);
             })
@@ -1321,19 +1360,91 @@ router.get('/getFeedbacklist',verify,(request,response)=>{
      })
 })
 
+router.get('/getfeedbackIT/:procid',verify,(request,response)=>{
+    let procid=request.params.procid;
+    let objUser=request.user;
+    console.log('obhUser =>'+objUser);
+    console.log('parentId '+procid);
+    response.render('getlistFeedbackIT',{procid,objUser});
+})
+router.get('/getfeedbackITlist',verify,(request,response)=>{
+    let parentid=request.query.parentId;
+    console.log('parentid '+parentid);
+    let qry = 'SELECT sfid,Name,quyantiut__c,timely_submissions_of_deliverables_goods__c,work_quality_goods_quality__c,issue_knowledge_expertise__c,procurement_it__c FROM salesforce.Feedbacks_IT__c WHERE procurement_it__c=$1';
+    console.log('qry  =>'+qry)
+     pool.query(qry,[parentid])
+     .then((feedbackqueryresult) => {
+         console.log('feedbackqueryresult IT : '+JSON.stringify(feedbackqueryresult.rows));
+         if(feedbackqueryresult.rowCount>0){
+            let modifiedList = [],i =1;
+             feedbackqueryresult.rows.forEach((eachRecord) => {
+              let obj = {};
+              obj.sequence = i;
+              obj.name = '<a href="#" class="vendorTag" id="'+eachRecord.sfid+'" >'+eachRecord.name+'</a>';
+              obj.quantity=eachRecord.quyantiut__c
+              obj.time=eachRecord.timely_submissions_of_deliverables_goods__c;
+              obj.quality=eachRecord.work_quality_goods_quality__c;
+              obj.issue = eachRecord.issue_knowledge_expertise__c;
+              obj.editAction = '<button href="#" class="btn btn-primary editfeedIt" id="'+eachRecord.sfid+'" >Edit</button>'
+              i= i+1;
+              modifiedList.push(obj);
+            })
+            console.log('modifiedList '+JSON.stringify(modifiedList));
+            response.send(modifiedList);
+        }
+        else
+        {
+            response.send([]);
+        }
+     })
+     .catch((error) => {
+         console.log('error  : '+error.stack);
+         response.send('Error Occurred !');
+     })
+
+})
+router.get('/getfeedbackdetail',(request,response)=>{
+    let parentid=request.query.parentId;
+    console.log('parentid '+parentid);
+    let qry = 'SELECT sfid,Name,Timely_submissions_of_all_Deliverables__c,Work_Quality_Goods_Quality__c,Issue_Knowledge_Expertise__c,Procurement_Non_IT__c FROM salesforce.Feedback__c WHERE sfid=$1';
+    console.log('qry  =>'+qry)
+    pool.query(qry,[parentid])
+    .then((result)=>{
+        console.log(JSON.stringify(result.rows));
+        response.send(result.rows);
+    }).catch((eroor)=>{
+        console.log(JSON.stringify(error.stack))
+    })
+
+})
+router.get('/getfeedbackdetailIT',(request,response)=>{
+    let parentid=request.query.parentId;
+    console.log('parentid '+parentid);
+    let qry = 'SELECT sfid,Name,quyantiut__c,timely_submissions_of_deliverables_goods__c,work_quality_goods_quality__c,issue_knowledge_expertise__c,procurement_it__c FROM salesforce.Feedbacks_IT__c WHERE sfid=$1';
+    console.log('qry  =>'+qry)
+    pool.query(qry,[parentid])
+    .then((result)=>{
+        console.log(JSON.stringify(result.rows));
+        response.send(result.rows);
+    }).catch((eroor)=>{
+        console.log(JSON.stringify(error.stack))
+    })
+
+})
 
 router.post('/savefeedback',(request,response)=>{
     let body = request.body;
     console.log('body  : '+JSON.stringify(body));
-    const{time,quality, issue,procidt}=request.body;
+    const{time,quality, issue,quantity,procid}=request.body;
     console.log('time'+time);
     console.log('quality'+quality);
-    console.log('procidt'+procidt);
+    console.log('procidt'+procid);
     console.log('issue'+issue);
+    console.log('quantity '+quantity);
 
-    let feedCreateqry = 'INSERT INTO salesforce.Feedback__c (Timely_submissions_of_all_Deliverables__c,Work_Quality_Goods_Quality__c,Procurement_Non_IT__c,Issue_Knowledge_Expertise__c ) VALUES ($1,$2,$3,$4)';
+    let feedCreateqry = 'INSERT INTO salesforce.Feedback__c (quantity_requested_vs_received__c,work_quality_goods_quality__c,timely_submissions_of_all_deliverables__c,procurement_non_it__c,issue_knowledge_expertise__c ) VALUES ($1,$2,$3,$4,$5)';
     console.log('feedCreateqry=>'+feedCreateqry);
-    pool.query(feedCreateqry,[time,quality,procidt,issue])
+    pool.query(feedCreateqry,[quantity,time,quality,procid,issue])
     .then((queryResult)=>{
         console.log('feedback INsert query result '+JSON.stringify(queryResult));
         response.send('succesfully inserted');
@@ -1344,5 +1455,98 @@ router.post('/savefeedback',(request,response)=>{
     })
 })
 
+router.post('/updatefeedBack',(request,response)=>{
+
+    let body = request.body;
+    console.log('body  : '+JSON.stringify(body));
+    const { name, time,issue,quality,qua,feedid} = request.body;
+    console.log('name    '+name);
+    console.log('time  '+time);
+    console.log('issue  '+issue);
+    console.log('quality  '+quality);
+    console.log('feedid  '+feedid);
+    console.log('qua  '+qua);
+    let updateQuerry = 'UPDATE salesforce.Feedback__c SET '+
+    'Timely_submissions_of_all_Deliverables__c = \''+time+'\', '+
+    'Issue_Knowledge_Expertise__c = \''+issue+'\', '+
+    'quantity_requested_vs_received__c = \''+qua+'\', '+
+    'Work_Quality_Goods_Quality__c= \''+quality+'\' '+
+    'WHERE sfid = $1';
+console.log('updateQuerry  '+updateQuerry);
+pool
+.query(updateQuerry,[feedid])
+.then((updateQuerryResult) => {     
+console.log('updateQuerryResult =>>'+JSON.stringify(updateQuerryResult));
+response.send("succesfully Update");
+})
+.catch((updatetError) => {
+console.log('updatetError'+updatetError.stack);
+response.send('Error');
+})
+
+})
+
+router.post('/savefeedbackIT',(request,response)=>{
+    let body = request.body;
+    console.log('body  : '+JSON.stringify(body));
+    const{time,quality,name, issue,quantity,procid}=request.body;
+    console.log('name '+name);
+    console.log('time'+time);
+    console.log('quality'+quality);
+    console.log('procidt'+procid);
+    console.log('issue'+issue);
+    console.log('quantity '+quantity);
+    let record=[];
+    record.push(quantity);
+    record.push(time);
+    record.push(quality);
+    record.push(issue);
+    record.push(procid);
+    let lstRecord =[];
+    lstRecord.push(record);
+    console.log('lst record '+lstRecord);
+    let feedCreateqry = format('INSERT INTO salesforce.Feedbacks_IT__c (quyantiut__c,timely_submissions_of_deliverables_goods__c,work_quality_goods_quality__c,issue_knowledge_expertise__c,procurement_it__c ) VALUES %L returning id',lstRecord);;
+    console.log('feedCreateqry=>'+feedCreateqry);
+    pool.query(feedCreateqry)
+    .then((queryResult)=>{
+        console.log('feedback INsert query result '+JSON.stringify(queryResult));
+        response.send('succesfully inserted');
+    })
+    .catch((error)=>{
+        console.log(error.stack);
+        response.send(error.stack);
+    })
+
+})
+router.post('/updateITfeedback',(request,response)=>{
+    let body = request.body;
+    console.log('body  : '+JSON.stringify(body));
+    const{time,quality,name, issue,quantity,feedid}=request.body;
+    console.log('name '+name);
+    console.log('time'+time);
+    console.log('quality'+quality);
+    console.log('procidt'+feedid);
+    console.log('issue'+issue);
+    console.log('quantity '+quantity);
+    
+    let updateQuerry = 'UPDATE salesforce.Feedbacks_IT__c SET '+
+    'quyantiut__c = \''+quantity+'\', '+
+    'timely_submissions_of_deliverables_goods__c = \''+time+'\', '+
+    'issue_knowledge_expertise__c = \''+issue+'\', '+
+    'work_quality_goods_quality__c= \''+quality+'\' '+
+    'WHERE sfid = $1';
+console.log('updateQuerry  '+updateQuerry);
+pool
+.query(updateQuerry,[feedid])
+.then((updateQuerryResult) => {     
+console.log('updateQuerryResult =>>'+JSON.stringify(updateQuerryResult));
+response.send("succesfully Update");
+})
+    .catch((error)=>{
+        console.log(error.stack);
+        response.send(error.stack);
+    })
+
+})
 
 module.exports = router;

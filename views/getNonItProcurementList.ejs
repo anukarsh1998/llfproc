@@ -377,8 +377,8 @@
                                 htmlTable += '<td>'+record.others__c+'</td>';
                             htmlTable += '</tr>';
                             htmlTable += '<tr>';
-                              htmlTable += '<td><strong>Approver</strong></td>';
-                              htmlTable += '<td>'+record.approvers__c+'</td>';
+                              htmlTable += '<td><strong>Number Of Quotes</strong></td>';
+                      htmlTable += '<td>'+record.number_of_quotes__c+'</td>';
                               htmlTable += '<td><strong>State</strong></td>';
                               htmlTable += '<td>'+record.state__c+'</td>';
                           htmlTable += '</tr>';
@@ -418,8 +418,9 @@
                     htmlTable += '<tr>';
                       htmlTable += '<td><strong>Justification</strong></td>';
                       htmlTable += '<td>'+record.justification__c+'</td>';
-                      htmlTable += '<td><strong>Number Of Quotes</strong></td>';
-                      htmlTable += '<td>'+record.number_of_quotes__c+'</td>';
+                      htmlTable +='<td></td>';
+                      htmlTable +='<td></td>';
+                      
                   htmlTable += '</tr>';
                             $('#procTable').empty();
                             $('#procTable').html(htmlTable);

@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="/stylesheets/table-sortable.css">
 <script src="/scripts/table-sortable.js" ></script>
 
-<h4 style="text-align: center;">FEEDBACK LIST VIEW PROCUREMENT-NON IT</h4>
+<h4 style="text-align: center;">FEEDBACK LIST VIEW PROCUREMENT-IT</h4>
 <div class="container">
     <div class="row mt-5 mb-3 align-items-center">
         <div class="col-md-3">
@@ -33,32 +33,29 @@
  </div>
 
 </div>
+<!-- EDIT modal -->
 
-<!-- Edit MOdal for Feedback NON-IT -->
-<div class="">
-    <div id="errorMessages"></div>
-
-<div id="fedNonItEditModal" class="modal fade ">
+<div id="fedItEditModal" class="modal fade ">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">EDIT PROCUREMENT-NON IT FEEDBACK</h5>
+          <h5 class="modal-title">EDIT PROCUREMENT-IT FEEDBACK</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
       
         <div class="modal-body" id="editModalBody" >
-            <form name="editFeedNONit" id="editFeedNONit" >
+            <form name="editFeedit" id="editFeedit" >
              <div class="form-group">
                 <div class="row">
                     <div class="col-md-6">
-                      <label for="name">Feedback Name</label>
-                      <input type="text" disabled class="form-control" id="name" value=""   name="name" >
+                      <label for="name">Feedbacks(IT) Name</label>
+                      <input type="text"  class="form-control" id="name" value="" readonly  name="name" required="true">
                     </div>
                     
                     <div class="col-md-6">
-                    <label for="time">Timely submissions of all Deliverables</label>
+                    <label for="time">Timely submissions of Deliverables/Goods</label>
                     <select id="time" name="time" class="form-control" required="true" >
                         <option value="">None</option>
                         <option value="Delighted">Delighted</option>
@@ -99,15 +96,15 @@
             <div class="form-group">
                 <div class="row">
                     <div class="col-md-6">
-                    <label for="qua">Quantity Requested vs Received </label>
-                    <select id="qua" name="qua" class="form-control" required="true" >
-                        <option value="">None</option>
-                        <option value="Delighted">Delighted</option>
-                        <option value="Satisfactory">Satisfactory	</option>
-                        <option value="Dissatisfied">Dissatisfied</option>
-                        <option value="NA">NA</option>
-                    </select> 
-                 </div>
+                        <label for="quantity">Quantity Requested vs Received </label>
+                        <select id="quantity" name="quantity" class="form-control" required="true" >
+                            <option value="">None</option>
+                            <option value="Delighted">Delighted</option>
+                            <option value="Satisfactory">Satisfactory	</option>
+                            <option value="Dissatisfied">Dissatisfied</option>
+                            <option value="NA">NA</option>
+                        </select> 
+                    </div>
                     <div class="col-md-6">
                     <input type="hidden" class="form-control" id="feedid" value=""   name="feedid" >
                     </div>
@@ -122,11 +119,16 @@
           </div>
   </div>
 </div>
-</div>
+
 </div>
 
 
 <!-- End of modal edit  -->
+
+
+
+
+
 
 <script>
 
@@ -139,11 +141,11 @@
   
           let columns ={
               sequence : 'Sequence',
-              name: 'Feedback Name',
-              time : 'Timely submissions of all Deliverables',
+              name: 'Feedbacks(IT) Name',
+              quantity:'Quantity Requested vs Received',
+              time : 'Timely submissions of Deliverables/Goods',
               quality: 'Work Quality/Goods Quality',
               issue:'Issue Knowledge/ Expertise',
-              quant:'Quantity Requested vs Received',
               editAction:'Action',
           }
           var table = $('#procurementItListView').tableSortable({
@@ -169,9 +171,8 @@
             },
             tableDidUpdate: () => {
             console.log('table did update');
-            additionalEditFunctionality();
            // anchorClickFunctionalities();
-         //   additionalEditFunctionality();
+            additionalEditFunctionality();
             
             },
             tableWillUnmount: () => console.log('table will unmount'),
@@ -194,7 +195,7 @@
         })
 
        $.ajax({
-            url : '/procurement/getFeedbacklist',
+            url : '/procurement/getfeedbackITlist',
             type:'get',
             data:{parentId:parentId},
             dataType: 'json'
@@ -212,16 +213,15 @@
         })
 
 });
-
 function additionalEditFunctionality(){
-    $('.feededit').on('click',function(event){
+    $('.editfeedIt').on('click',function(event){
         event.stopPropagation();
         event.stopImmediatePropagation();
         let procurementId = this.id;
         alert('edit feed NON-IT ID=>'+procurementId);
-        $('#fedNonItEditModal').modal('show'); 
+        $('#fedItEditModal').modal('show'); 
         $.ajax({
-            url : '/procurement/getfeedbackdetail',
+            url : '/procurement/getfeedbackdetailIT',
             type:'get',
             data : {
                 parentId : procurementId
@@ -235,11 +235,12 @@ function additionalEditFunctionality(){
           console.log('response fron It feedback Edit +='+JSON.stringify(response));
           let feedDetail=response[0];
           console.log('feedDetail'+feedDetail);
-          document.forms["editFeedNONit"]["name"].value = feedDetail.name;
-          document.forms["editFeedNONit"]["time"].value = feedDetail.timely_submissions_of_all_deliverables__c;
-          document.forms["editFeedNONit"]["feedid"].value = feedDetail.sfid;
-          document.forms["editFeedNONit"]["issue"].value = feedDetail.issue_knowledge_expertise__c;
-          document.forms["editFeedNONit"]["quality"].value = feedDetail.work_quality_goods_quality__c;
+          document.forms["editFeedit"]["name"].value = feedDetail.name;
+          document.forms["editFeedit"]["time"].value = feedDetail.timely_submissions_of_deliverables_goods__c;
+          document.forms["editFeedit"]["feedid"].value = feedDetail.sfid;
+          document.forms["editFeedit"]["issue"].value = feedDetail.issue_knowledge_expertise__c;
+          document.forms["editFeedit"]["quality"].value = feedDetail.work_quality_goods_quality__c;
+          document.forms["editFeedit"]["quantity"].value = feedDetail.quyantiut__c;
           
         })
         .fail((jqXHR, status, error) =>{
@@ -254,7 +255,7 @@ function additionalEditFunctionality(){
                   event.stopPropagation();
                   event.stopImmediatePropagation();
                   alert('Save Button Clicked !');
-                  var $inputs = $('#editFeedNONit :input');
+                  var $inputs = $('#editFeedit :input');
 
                   // not sure if you wanted this, but I thought I'd add it.
                   // get an associative array of just the values.
@@ -266,7 +267,7 @@ function additionalEditFunctionality(){
                   console.log('fomvalues=> '+JSON.stringify(values));
                   alert('formValues : '+JSON.stringify(values));
                   $.ajax({
-                    url : '/procurement/updatefeedBack',
+                    url : '/procurement/updateITfeedback',
                     type:'post',
                     data: values,
                     dataType : 'json',
@@ -287,8 +288,8 @@ function additionalEditFunctionality(){
                     if(jqXHR.responseText=='succesfully Update')
                     {
                         alert('Successfully Update');
-                       // $('#fedNonItEditModal').modal('hide');
-                        document.getElementById("editFeedNONit").reset();
+                        $('#fedItEditModal').modal('hide');
+                        document.getElementById("editFeedit").reset();
                     }
                   })
           })

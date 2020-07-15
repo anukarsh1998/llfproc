@@ -187,8 +187,7 @@
                                             assetDetailsTableRows += '</tr>';   
                                         assetDetailsTableRows += '<tr>';
                                             
-                                            assetDetailsTableRows += '<td><strong>GST<strong></td>';
-                                                assetDetailsTableRows += '<td>'+assetDetailsRecord.gst__c+'</td>';
+                                        
                                             assetDetailsTableRows += '</tr>';  
                                         
                                     
@@ -1014,13 +1013,27 @@
                 function(assetDetailsRecord){
 
                     console.log('Edit assetDetails   : '+JSON.stringify(assetDetailsRecord));
-                             
+                    let strReceivingGoodsDate=''; 
+                    let strclousreActualDate='';
+                    let clousrePlanDate ='';     
                     let clousreActualDate = new Date(assetDetailsRecord.requested_closure_actual_date__c);
-                    let strclousreActualDate = assetDetailsRecord.requested_closure_actual_date__c.split('T')[0];
+                    console.log('clousreActualDate '+clousreActualDate);
+                    if(assetDetailsRecord.requested_closure_actual_date__c!=null){
+                         strclousreActualDate = assetDetailsRecord.requested_closure_actual_date__c.split('T')[0];
+                    }
+
+                    
                   //  console.log('strclousreActualDate   : '+strclousreActualDate);
-                    let clousrePlanDate = assetDetailsRecord.requested_closure_plan_date__c.split('T')[0];
-                    let strReceivingGoodsDate = assetDetailsRecord.date_of_receiving_goods__c.split('T')[0];
-                    console.log('strReceivingGoodsDate  : '+strReceivingGoodsDate +' :clousrePlanDate '+ clousrePlanDate);
+                    if(assetDetailsRecord.requested_closure_plan_date__c!=null)
+                    {
+                         clousrePlanDate = assetDetailsRecord.requested_closure_plan_date__c.split('T')[0];
+                    }
+                    if(assetDetailsRecord.date_of_receiving_goods__c!=null){
+                         strReceivingGoodsDate = assetDetailsRecord.date_of_receiving_goods__c.split('T')[0];
+                        console.log('strReceivingGoodsDate  : '+strReceivingGoodsDate +' :clousrePlanDate '+ clousrePlanDate);
+                    }
+                    
+              
 
                     document.forms["editAssetForm"]["assetName"].value = assetDetailsRecord.name;
                     
@@ -1098,7 +1111,7 @@
                 })
                 .fail((jqXHR, status, error) => {
                       console.log('jqXHR  '+JSON.stringify(jqXHR));
-                      alert('data succesfully inserted ');
+                     // alert('data succesfully inserted ');
                       if(jqXHR.responseText=='succesfully inserted'){
                         alert('data succesfully inserted ');
                         $('#assetRequisitionEditModal').modal('hide');

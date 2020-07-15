@@ -47,16 +47,62 @@
           </button>
         </div>
         <div class="modal-body">
-  
+          <div class="row">
+          <div class="col-md-12">
+          <nav>
+          <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+          <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Details</a>
+          <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Related</a>
+          </div>
+          </nav>
+          <div class="tab-content" id="nav-tabContent">
+          <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+          <!-- Non It Details --> 
           <div id="detailLoadingSpinner">
-            <center> <img src="/spinner-gif-transparent-background-14.gif" />  </center>
-        </div>
-        <div class="table-responsive">
-        <table id="procItTable" class="table">
-
-        </table>
-      </div>
-        </div>
+          <center> <img src="/spinner-gif-transparent-background-14.gif" /> </center>
+          </div>
+          <div class="table-responsive">
+          <table id="procItTable" class="table">
+          </table>
+          </div>
+          <!-- Particul Non It Details-->
+          </div>
+          
+          <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+          <div class="accordion" id="accordionExample">
+          
+          <div class="card">
+          <div class="card-header" id="headingOne">
+          <h5 class="mb-0">
+          <button class="btn btn-link text-left" type="pettyCashButton"
+          data-toggle="collapse" data-target="#collapseOne"
+          aria-expanded="true" aria-controls="collapseOne">
+          <i class="fa fa-angle-double-right mr-3"></i>Feedback
+          </button>
+          <!-- <button class="btn btn-primary float-right" id="pettyCashButton" >New</button> -->
+         <!--  <a href="#" class="btn btn-primary float-right procurementNonIT" id="createAssetRequisitionFormButton" style="color:white;" >New</a> -->
+          <a href="#" class="btn btn-primary float-right feedback" style="color:white;">New</a>
+          </h5>
+          </div>
+         
+          <div id="collapseOne" class="collapse show fade" aria-labelledby="headingOne" data-parent="#accordionExample">
+          <div class="card-body">
+         
+          <!-- Feedback table code -->
+          <table id="feedbackTable" class="table table-hover striped">
+          </table>
+          <!-- Feedback table code -->
+          </div>
+          </div>
+          </div>
+          
+          </div>
+          </div>
+          </div>
+          </div>
+          </div>
+         
+          </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         </div>
@@ -243,9 +289,9 @@
             .done((response)=>{
                 $('#detailLoadingSpinner').hide();
                 console.log('respsnse = '+JSON.stringify(response));
-                         if(response.length > 0)
+                         if(response.proc.length > 0)
                             {
-                              let record = response[0];
+                              let record = response.proc[0];
                               let htmlTable = '';
                               htmlTable += '<tr>';
                                 htmlTable += '<td><strong>Procurement- IT ID</strong></td>';
@@ -269,17 +315,15 @@
                             htmlTable += '<tr>';
                               htmlTable += '<td><strong>Others</strong></td>';
                               htmlTable += '<td>'+record.others__c+'</td>';
-                              htmlTable += '<td><strong>Approvers</strong></td>';
-                              htmlTable += '<td>'+record.approvers__c+'</td>';
-                          htmlTable += '</tr>';
-                          htmlTable += '<tr>';
-                            htmlTable += '<td><strong>Quote1</strong></td>';
+                              htmlTable += '<td><strong>Quote1</strong></td>';
                             if(record.quote1__c!="demo1"){
                             htmlTable += '<td>'+'<a href="'+record.quote1__c+'" target="_blank">Click to View Quote</a></td>';
                             }
                             else{
                               htmlTable += '<td></td>';
-                            }
+                            } 
+                          htmlTable += '</tr>';
+                          htmlTable += '<tr>';
                             htmlTable += '<td><strong>Quote2</strong></td>';
                             if(record.quote2__c!="demo2"){
                             htmlTable += '<td>'+'<a href="'+record.quote2__c+'" target="_blank">Click to View Quote</a></td>';
@@ -287,18 +331,13 @@
                             else{
                               htmlTable+= '<td></td>';
                             }
-                           htmlTable += '</tr>';
-                           htmlTable += '<tr>';
-                              htmlTable += '<td><strong>Quote3</strong></td>';
-                              if(record.quote3__c!="demo3"){
-                              htmlTable += '<td>'+'<a href="'+record.quote3__c+'" target="_blank">Click to View Quote</a></td>';
-                              }
-                              else{
-                                htmlTable +='<td></td>';
-                              }
-                              htmlTable += '<td><strong>Is released from stock</strong></td>';
-                              htmlTable += '<td>'+record.is_released_from_stock__c+'</td>';
-                             
+                            htmlTable += '<td><strong>Quote3</strong></td>';
+                            if(record.quote3__c!="demo3"){
+                            htmlTable += '<td>'+'<a href="'+record.quote3__c+'" target="_blank">Click to View Quote</a></td>';
+                            }
+                            else{
+                              htmlTable +='<td></td>';
+                            }
                            htmlTable += '</tr>';
                            htmlTable += '<tr>';
                             htmlTable += '<td><strong>State</strong></td>';
@@ -323,7 +362,23 @@
                             $('#procItTable').html(htmlTable);
                             }
                             vendorDetailFunction();
-
+                            createFeedback(procurementId);
+                if(response.feedback.length>0){
+                  let ftable='';
+                  ftable +='<thead><th>Feedbacks(IT) Name</th><th>Quantity Requested vs Received</th><th>Timely submissions of Deliverables/Goods</th><th>Work Quality/Goods Quality</th><th>Issue Knowledge/ Expertise</th>';
+                  response.feedback.forEach((eachRecord)=>{
+                    ftable +='<tr>';
+                      ftable +='<td>'+eachRecord.name+'</td>';   
+                      ftable +='<td>'+eachRecord.quyantiut__c+'</td>';
+                      ftable +='<td>'+eachRecord.timely_submissions_of_deliverables_goods__c+'</td>';
+                      ftable +='<td>'+eachRecord.work_quality_goods_quality__c+'</td>';  
+                      ftable +='<td>'+eachRecord.issue_knowledge_expertise__c+'</td>';
+                    ftable +='</tr>';
+                  })
+                  ftable+=  '<td colspan="6"><center><a target="_blank" href="/procurement/getfeedbackIT/'+procurementId+'">View All</a></centre></td>';
+                  $('#feedbackTable').empty();
+                    $('#feedbackTable').html(ftable);
+                }
             })
             .fail((jqXHR, status, error) =>{
                 $('#detailLoadingSpinner').show();
@@ -333,6 +388,14 @@
       
           })
         }
+        function createFeedback(proid){
+          // alert('procId'+proid);
+           $('a.feedback').click(() => {
+             console.log('proccurement id '+proid);
+             location.assign('/procurement/createFeedbackIT/'+proid);
+         });
+         }
+
         function vendorDetailFunction(){
           $('a.vendorDetTag').on('click',function(event){
             event.stopPropagation();
