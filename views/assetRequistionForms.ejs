@@ -888,7 +888,7 @@
                     <div class="col-md-6">
                       <label for="paymentStatus"></label>Payment Status</label>
                      <!--  <input type="text" class="form-control" id="paymentStatus" value=""   name="paymentStatus" >         -->
-                     <select id="paymentStatus" class="custom-select custom-select-sm form-control" name="paymentStatus">
+                     <select id="paymentStatus" class="custom-select custom-select-sm form-control" readonly name="paymentStatus">
                         <option value="">--None--</option>
                         <option value="Released">Released</option>
                         <option value="Rejected">Rejected</option>
@@ -1121,8 +1121,9 @@
                     document.forms["editAssetForm"]["closureActualDate"].value = strclousreActualDate;
                     document.forms["editAssetForm"]["closurePlanDate"].value =clousrePlanDate;
                     document.forms["editAssetForm"]["projectName"].value = assetDetailsRecord.projname;
-                       
                     document.forms["editAssetForm"]["activityCode"].value = assetDetailsRecord.activity_code__c;
+                    document.forms["editAssetForm"]["status"].value = assetDetailsRecord.status__c; 
+                    document.forms["editAssetForm"]["payement"].value = assetDetailsRecord.payment_received_acknowledgement__c;
                     document.forms["editAssetForm"]["paymentStatus"].value = assetDetailsRecord.payment_status__c;
                     document.forms["editAssetForm"]["receiverName"].value = assetDetailsRecord.receiver_name__c;
                     document.forms["editAssetForm"]["receivedQuantity"].value = assetDetailsRecord.received_quantity_goods__c;
@@ -1192,11 +1193,12 @@
                 })
                 .fail((jqXHR, status, error) => {
                       console.log('jqXHR  '+JSON.stringify(jqXHR));
-                     // alert('data succesfully inserted ');
                       if(jqXHR.responseText=='succesfully inserted'){
-                        alert('data succesfully inserted ');
+                        alert('data succesfully updated ');
                         $('#assetRequisitionEditModal').modal('hide');
-
+                      }
+                      else{
+                          alert('Error in Updates :'+jqXHR.responseText);
                       }
                       
                 })  
