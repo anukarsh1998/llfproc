@@ -125,8 +125,7 @@
         </div>
        
         <div id="collapseOne" class="collapse show fade" aria-labelledby="headingOne" data-parent="#accordionExample">
-        <div class="card-body">
-       
+                 <div style="overflow-x:auto;">
         <!-- Feedback table code -->
         <table id="feedbackTable" class="table table-hover striped">
         </table>
@@ -429,10 +428,11 @@
                 createFeedback(procurementId);
                 if(response.feedback.length>0){
                   let ftable='';
-                  ftable +='<thead><th>Feedback Name<th><th>Timely submissions of all Deliverables</th><th>Work Quality/Goods Quality</th><th>Issue Knowledge/ Expertise</th>';
+                  ftable +='<thead><th>Feedback Name</th><th>Quantity Requested vs Received</th><th>Timely submissions of all Deliverables</th><th>Work Quality/Goods Quality</th><th>Issue Knowledge/ Expertise</th>';
                   response.feedback.forEach((eachRecord)=>{
                     ftable +='<tr>';
-                      ftable +='<td>'+eachRecord.name+'</td>';   
+                      ftable +='<td>'+eachRecord.name+'</td>';
+                      ftable +='<td>'+eachRecord.quantity_requested_vs_received__c+'</td>';
                       ftable +='<td>'+eachRecord.timely_submissions_of_all_deliverables__c+'</td>';
                       ftable +='<td>'+eachRecord.work_quality_goods_quality__c+'</td>';  
                       ftable +='<td>'+eachRecord.issue_knowledge_expertise__c+'</td>';

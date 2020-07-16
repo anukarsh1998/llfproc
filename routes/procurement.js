@@ -43,7 +43,7 @@ router.get('/assetEditDetails',(request, response) =>{
     'asset.Number_Of_IT_Product__c,asset.Number_Of_Non_IT_Product__c,asset.Procurement_IT_total_amount__c,asset.Procurement_Non_IT_total_amount__c, asset.Total_amount__c,proj.name as projname,proj.sfid as profsfid, '+
     'asset.Management_Approval_Activity_Code__c,asset.Management_Approval_for_fortnight_limit__c, '+
     'asset.Management_Approval_less_than_3_quotes__c,asset.Procurement_Comt_Approval_for_fortnight__c, '+
-     'asset.P_O_attachment__c,payment_status__c,asset.status__c,asset.payment_received_acknowledgement__c,asset.receiver_name__c,asset.received_quantity_goods__c,asset.date_of_receiving_goods__c '+
+     'asset.P_O_attachment__c,po_attachment_url__c,payment_status__c,asset.status__c,asset.payment_received_acknowledgement__c,asset.receiver_name__c,asset.received_quantity_goods__c,asset.date_of_receiving_goods__c '+
     'FROM  salesforce.Asset_Requisition_Form__c asset '+
      'INNER JOIN salesforce.Milestone1_Project__c proj '+
      'ON asset.Project_Department__c =  proj.sfid '+
@@ -84,7 +84,7 @@ router.get('/details',verify, async(request, response) => {
  'asset.Number_Of_IT_Product__c,asset.Number_Of_Non_IT_Product__c,asset.Procurement_IT_total_amount__c,asset.Procurement_Non_IT_total_amount__c, asset.Total_amount__c,proj.name as projname,proj.sfid, '+
  'asset.Management_Approval_Activity_Code__c,asset.Management_Approval_for_fortnight_limit__c, '+
  'asset.Management_Approval_less_than_3_quotes__c,asset.Procurement_Comt_Approval_for_fortnight__c, '+
-  'asset.P_O_attachment__c,asset.payment_status__c,asset.Status__c,asset.Payment_Received_Acknowledgement__c,asset.receiver_name__c,asset.received_quantity_goods__c,asset.date_of_receiving_goods__c '+
+  'asset.P_O_attachment__c,po_attachment_url__c,asset.payment_status__c,asset.Status__c,asset.Payment_Received_Acknowledgement__c,asset.receiver_name__c,asset.received_quantity_goods__c,asset.date_of_receiving_goods__c '+
  'FROM  salesforce.Asset_Requisition_Form__c asset '+
   'INNER JOIN salesforce.Milestone1_Project__c proj '+
   'ON asset.Project_Department__c =  proj.sfid '+
@@ -683,7 +683,7 @@ router.get('/getCostPerUnit',(request,response)=>{
     let sid=request.query.sid;
     console.log('seleceted ID =>'+sid);
     pool
-    .query('SELECT sfid,Per_Unit_Cost__c,unit__c,items__c FROM salesforce.Item_Description__c where Impaneled_Vendor__c =$1',[sid])
+    .query('SELECT sfid,Per_Unit_Cost__c,unit__c,items__c,Public_Quote_URL__c FROM salesforce.Item_Description__c where Impaneled_Vendor__c =$1',[sid])
     .then((querryResult)=>{
         console.log('queryResult  =>'+JSON.stringify(querryResult)+' '+ querryResult.rowCount);
         response.send(querryResult.rows);
@@ -866,7 +866,7 @@ router.get('/getProcurementDetail',async(request,response)=>{
    // response.send(querryResult.rows);
     procDetail.proc=querryResult.rows;
     console.log('oddskd '+JSON.stringify(procDetail));
-    pool.query('SELECT sfid,Name,Timely_submissions_of_all_Deliverables__c,Work_Quality_Goods_Quality__c,Issue_Knowledge_Expertise__c,Procurement_Non_IT__c FROM salesforce.Feedback__c WHERE Procurement_Non_IT__c=$1',[procurementId])
+    pool.query('SELECT sfid,Name,Timely_submissions_of_all_Deliverables__c,Work_Quality_Goods_Quality__c,Issue_Knowledge_Expertise__c,quantity_requested_vs_received__c,Procurement_Non_IT__c FROM salesforce.Feedback__c WHERE Procurement_Non_IT__c=$1',[procurementId])
                 .then((queryResult)=>{
                          console.log('queryResult'+JSON.stringify(queryResult));
                          procDetail.feedback=queryResult.rows;
@@ -1549,4 +1549,37 @@ response.send("succesfully Update");
 
 })
 
+router.get('/upload/:parentAssetId',(request,response)=>{
+    let parentAssetId = request.params.parentAssetId;
+    console.log('parentAssetId  '+parentAssetId);
+    response.render('uploadFile',{parentAssetId});
+})
+
+router.post('/uploadFiless',(request,response)=>{
+    let body=request.body;
+    console.log('body '+JSON.stringify(body));
+    const { imgpath,hide}=request.body;
+    console.log('hide '+hide);
+    console.log('imgpath '+imgpath);
+    var poattachment='Yes';
+
+    let updateQuerry = 'UPDATE salesforce.Asset_Requisition_Form__c SET '+
+    'P_O_attachment__c = \''+poattachment+'\', '+
+    'PO_Attachment_URL__c = \''+imgpath+'\' '+
+    'WHERE sfid = $1';
+    console.log('updateQuerry '+updateQuerry);
+    if(imgpath!='demo'){
+        pool.query(updateQuerry,[hide])
+        .then((queryResultUpdate)=>{
+            console.log('queryResultUpdate '+JSON.stringify(queryResultUpdate));
+            response.send('succesfully inserted');
+        }).catch((eroor)=>{console.log(JSON.stringify(eroor.stack))})
+
+    }
+    else{
+        response.send('ERROR PLEASE CHOOSE FILE FILE');
+    }
+  
+})
+    
 module.exports = router;

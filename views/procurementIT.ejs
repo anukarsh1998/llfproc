@@ -218,9 +218,10 @@
            if(each.sfid==sif){
             gstNo.value=each.gst_no__c;
             sid=each.sfid;
-            $('#itquote'+cnt)
+           /* $('#itquote'+cnt)
             .attr("href",each.quote_public_url__c)
             .text('Available Quote');
+            */
            }
           })
          alert('Vendor Id=>'+sid);
@@ -240,7 +241,16 @@
                   //alert('unit for Item'+each.unit__c);
                   let itemUnit=document.getElementById('unit'+cnt);
                   itemUnit.value=each.unit__c;
-      
+                  if(each.public_quote_url__c){
+                  $('#itquote'+cnt)
+                   .attr("href",each.public_quote_url__c)
+                   .text('Available Quote'); 
+                  }  
+                  else{
+                    $('#itquote'+cnt)
+                    .attr("href",each.public_quote_url__c)
+                    .text('No Quote Available'); 
+                  }   
                 }
               })
             }
