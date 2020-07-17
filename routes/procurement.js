@@ -1267,9 +1267,9 @@ router.post('/sendProcurementAccountsApproval',(request, response) => {
               response.send('You cannot send for accounts approval until there is a pending status !');
           }
           else{
-              console.log('READY FOR SEND APPROVAL');
+              console.log('READY FOR SEND Accout APPROVAL');
               pool
-              .query('UPDATE salesforce.Asset_Requisition_Form__c SET isSentForApprovalFromHeroku__c = $1 ,Heroku_Approval_Comment__c =$2 WHERE sfid= $3;',[true, body.comment, body.assetRequisitionFormId])
+              .query('UPDATE salesforce.Asset_Requisition_Form__c SET isSentForApprovalFromHeroku__c = $1 ,Heroku_Accounts_Approval_Comment__c =$2 WHERE sfid= $3;',[true, body.comment, body.assetRequisitionFormId])
               .then((requisitionQueryResult) =>{
                   console.log('requisitionQueryResult  : '+JSON.stringify(requisitionQueryResult));
                   response.send('Accounts Approval Sent Successfully !');
