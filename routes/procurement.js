@@ -1263,7 +1263,7 @@ router.post('/sendProcurementAccountsApproval',(request, response) => {
           (  eachRequisitionForm.management_approval_activity_code__c == 'Pending')
           )
           {
-              connsole.log('one of the fields are is pending state');
+              console.log('one of the fields are is pending state');
               response.send('You cannot send for accounts approval until there is a pending status !');
           }
           else{
