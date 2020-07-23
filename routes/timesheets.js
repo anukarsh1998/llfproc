@@ -5,6 +5,7 @@ const verify = require('../config/verifyToken');
 const jwt = require('jsonwebtoken');
 const { json, request, response } = require('express');
 const { errors } = require('pg-promise');
+const Joi = require('@hapi/joi');
 
 
 router.get('/timesheet',verify,(request, response) => {
@@ -360,7 +361,7 @@ router.post('/fillactuals',(request, response) => {
     
  }); */
 
-
+/* 
  router.get('/getprejectTeam',verify,(request,response)=>{
   console.log('request.user '+JSON.stringify(request.user));
   var userId = request.user.sfid;
@@ -378,9 +379,8 @@ router.post('/fillactuals',(request, response) => {
      .catch((error)=>{
        console.log('error '+JSON.stringify(error.stack));
      })
- })
-
-router.get('/getTeamdetails',verify,async(request,response)=>{
+ }) */
+router.get('/getallTeamdetails',verify,async(request,response)=>{
   console.log('request.user '+JSON.stringify(request.user));
   var userId = request.user.sfid;
   var userName = request.user.name;
@@ -396,84 +396,67 @@ router.get('/getTeamdetails',verify,async(request,response)=>{
   var teamtskqry='';
 
   var lstTasksToShow = [],contname=[];
-  var projectParams = [], projectIDs = [];
+  /* var projectParams = [], projectIDs = [];
   var timesheetParams = [], taskIDs = [];
   var projectMap = new Map();
   
-  var lstTaskOfRelatedDate ;
+  var lstTaskOfRelatedDate ; */
   
 
-  pool.query('SELECT id,name,sfid,Project__c,Team__c FROM salesforce.Project_Team__c WHERE Project__c=$1',[selproject])
+  pool.query('SELECT id,name,sfid,Project__c,Team__c FROM salesforce.Project_Team__c')
   .then((projTeamResult)=>{
-    console.log('projectTeam '+JSON.stringify(projTeamResult.rows));
-    for(var i = 1; i <= teamQueryResult.rows.length; i++) {
-      projTeampram.push('$' + i);
-      lstProjTeam.push(projTeamResult.rows[i-1].team__c);
+    console.log('projectTeam '+JSON.stringify(projTeamResult.rows)+'rows '+projTeamResult.rowCount);
+    if(projTeamResult.rowCount<1){
+      console.log('djskdjjksdfjdks');
+      response.send(lstTasksToShow);
     }
-    })
-    .catch((error)=>{
-      console.log('error '+JSON.stringify(error.stack));
-    })
-
-
-
-
-  await pool.query('SELECT Id, sfid , Manager__c, name FROM salesforce.Team__c WHERE Manager__c = $1',[userId])
-  .then((teamQueryResult) => {
-    if(teamQueryResult.rowCount>0)
-    {
-    console.log('teamQueryResult team '+JSON.stringify(teamQueryResult.rows));
-    console.log('team size '+teamQueryResult.rowCount);
-      for(var i = 1; i <= teamQueryResult.rows.length; i++) {
-        teamParam.push('$' + i);
-        lstTeams.push(teamQueryResult.rows[i-1].sfid);
+    else{
+      projTeampram.push('$' + 1);
+      lstProjTeam.push(userId);
+       for(var i = 2; i <= projTeamResult.rows.length; i++) {
+        projTeampram.push('$' + i);
+        lstProjTeam.push(projTeamResult.rows[i-2].team__c);
       }
-      console.log(' lstTeams '+lstTeams+' teamParam '+teamParam);
-      let teamUserQuery='SELECT Id, sfid,representative__c , team__c FROM salesforce.Team_Member__c WHERE team__c IN ('+ teamParam.join(',')+ ')';
-      console.log('teamUserQuery '+teamUserQuery);
-      pool.query(teamUserQuery,lstTeams) 
-      .then((memberQryResult)=>{
-        console.log('member query '+JSON.stringify(memberQryResult.rows));
-        
-        if(selproject=='allproject')
-        {
-          teamMember.push(selectedDate);
-          teamMemberParam.push('$' + 2);
-          teamMember.push(userId);
-          for(var i = 3; i <= memberQryResult.rows.length+1; i++) {
-            teamMemberParam.push('$' + i);
-            teamMember.push(memberQryResult.rows[i-3].representative__c);
+      /* Team ehere team manager is curret uSer or not  */
+      let teamQry = 'SELECT Id, sfid , Manager__c, name FROM salesforce.Team__c WHERE Manager__c = $1 AND sfid IN ('+ projTeampram.join(',')+ ')';
+      console.log('teamQry '+teamQry);
+      pool.query(teamQry,lstProjTeam)
+      .then((teamQueryResult)=>{
+        console.log('team query result ='+JSON.stringify(teamQueryResult.rows));
+        if(teamQueryResult.rowCount>0){
+          for(var i = 1; i <= teamQueryResult.rows.length; i++) {
+            teamParam.push('$' + i);
+            lstTeams.push(teamQueryResult.rows[i-1].sfid);
           }
-                 teamtskqry='SELECT tsk.Id,tsk.sfid,tsk.name as tskname,tsk.Project_Name__c, tsk.Start_Date__c,tsk.assigned_manager__c,tsk.Planned_Hours__c,cont.sfid as contid ,cont.name as contname,proj.name as projname '+
-'                    FROM salesforce.Milestone1_Task__c tsk '+
-                    'INNER JOIN salesforce.Contact cont ON tsk.assigned_manager__c = cont.sfid '+
-                    'INNER JOIN salesforce.Milestone1_Project__c proj ON tsk.Project_Name__c= proj.sfid '+
-                    //'INNER JOIN salesforce.Milestone1_Time__c tmshe ON tsk.sfid = tmshe.Project_Task__c '+
-                    'WHERE Start_Date__c = $1 AND Assigned_Manager__c IN ('+ teamMemberParam.join(',')+ ')'+' AND tsk.sfid != \''+''+'\''; 
-                    console.log('teamtskqry' +teamtskqry +' member Param '+teamMemberParam +'member '+teamMember);
-        }
-        if(selproject!='allproject'){
-          teamMember.push(selectedDate);
-          teamMember.push(selproject);
-          teamMemberParam.push('$' + 3);
-          teamMember.push(userId);
-          for(var i = 4; i <= memberQryResult.rows.length+1; i++) {
-                 teamMemberParam.push('$' + i);
-                 teamMember.push(memberQryResult.rows[i-4].representative__c);
-           }
-           teamtskqry='SELECT tsk.Id,tsk.sfid as sfid,tsk.name as tskname,tsk.Project_Name__c, tsk.Start_Date__c,tsk.assigned_manager__c,tsk.Planned_Hours__c,cont.sfid as contid ,cont.name as contname,proj.name as projname '+
+          console.log(' lstTeams '+lstTeams+' teamParam '+teamParam);
+          /* TEAM member   */
+          let teamUserQuery='SELECT Id, sfid,representative__c , team__c FROM salesforce.Team_Member__c WHERE team__c IN ('+ teamParam.join(',')+ ')';
+          console.log('teamUserQuery '+teamUserQuery);
+          pool.query(teamUserQuery,lstTeams) 
+          .then((memberQryResult)=>{
+            console.log('member result '+JSON.stringify(memberQryResult.rows));
+            if(memberQryResult.rowCount>0){
+              teamMember.push(selectedDate);
+              teamMember.push(selproject);
+              teamMemberParam.push('$' + 3);
+              teamMember.push(userId);
+              for(var i = 4; i <= memberQryResult.rows.length+1; i++) {
+                     teamMemberParam.push('$' + i);
+                     teamMember.push(memberQryResult.rows[i-4].representative__c);
+               }
+               /* TAsk Query Started  */
+               teamtskqry='SELECT tsk.Id,tsk.sfid as sfid,tsk.name as tskname,tsk.Project_Name__c, tsk.Start_Date__c,tsk.assigned_manager__c,tsk.Planned_Hours__c,cont.sfid as contid ,cont.name as contname,proj.name as projname '+
 '                   FROM salesforce.Milestone1_Task__c tsk '+
                     'INNER JOIN salesforce.Contact cont ON tsk.assigned_manager__c = cont.sfid '+
                    // 'INNER JOIN salesforce.Milestone1_Time__c mileTime ON tsk.sfid = mileTime.project_task__c '+
                     'INNER JOIN salesforce.Milestone1_Project__c proj ON tsk.Project_Name__c= proj.sfid '+
                     'WHERE Start_Date__c = $1 AND tsk.Project_Name__c=$2 AND Assigned_Manager__c IN ('+ teamMemberParam.join(',')+ ')'+' AND tsk.sfid != \''+''+'\''; 
                     console.log('teamtskqry for selected PRoject 1' +teamtskqry +' member Param '+teamMemberParam +'member '+teamMember);
-          }
-          pool.query(teamtskqry,teamMember)
-          .then((teamtskqueryresult)=>{
-           // console.log('team task query result '+JSON.stringify(teamtskqueryresult.rows));
-            lstTasksToShow=teamtskqueryresult.rows;
-            pool.query('SELECT sfid, date__c, calculated_hours__c, project_Task__c  FROM salesforce.Milestone1_Time__c WHERE sfid IS NOT NULL')
+                    pool.query(teamtskqry,teamMember)
+                    .then((teamtskqueryresult)=>{
+                     // console.log('team task query result '+JSON.stringify(teamtskqueryresult.rows));
+                      lstTasksToShow=teamtskqueryresult.rows;
+                      pool.query('SELECT sfid, date__c, calculated_hours__c, project_Task__c  FROM salesforce.Milestone1_Time__c WHERE sfid IS NOT NULL')
             .then((timesheetQueryResult)=>{
               console.log('querryResult '+JSON.stringify(timesheetQueryResult.rows));
               console.log('lstTasksToShow x'+JSON.stringify(lstTasksToShow));
@@ -515,18 +498,331 @@ router.get('/getTeamdetails',verify,async(request,response)=>{
             }).catch((error)=>{
               console.log('errororo +'+JSON.stringify(errors.stack));
             })
-         //  response.send(teamtskqueryresult.rows);
-          }).catch((eror)=>{console.log('eroor in team task query '+JSON.stringify(eror.stack))})
-      })
-      .catch((eroorMEmberquery)=>{
-        console.log('eroorMEmberquery '+eroorMEmberquery.stack);
-      })
-    }
-  })
-  .catch((error)=>console.log('Error in team=> '+JSON.stringify(error.stack)))
-  
-})
+                    })
+                    .catch((tskqueryError)=>{
+                      console.log('tskqueryError '+JSON.stringify(tskqueryError.stack));
+                    })
+               /* Task query ended  */
+            }
+          })
+          .catch((meberError)=>{
+            console.log('error in memberQuery '+JSON.stringify(meberError.stack));
+          })
 
+          /* TEAM member End  */
+        }
+        else{
+          response.send('You are not the team MAneger for the related project');
+        }
+
+      })
+      .catch((teamError)=>{
+        console.log('team error '+JSON,stringify(teamError.stack));
+      })
+      /* ensd of team  */
+
+    }
+    
+    })
+    .catch((error)=>{
+      console.log('error '+JSON.stringify(error.stack));
+    })
+
+
+})
+router.get('/getTeamdetails',verify,async(request,response)=>{
+  console.log('request.user '+JSON.stringify(request.user));
+  var userId = request.user.sfid;
+  var userName = request.user.name;
+  console.log('userId : '+userId+'  userName  : '+userName);
+  var selproject=request.query.selproject;
+  var selectedDate = request.query.date;
+  console.log('date  '+selectedDate);
+  console.log('selected project '+selproject);
+
+  var projTeampram=[],lstProjTeam=[];
+  var teamParam=[],lstTeams=[];
+  var teamMemberParam=[],teamMember=[];
+  var teamtskqry='';
+
+  var lstTasksToShow = [],contname=[];
+  /* var projectParams = [], projectIDs = [];
+  var timesheetParams = [], taskIDs = [];
+  var projectMap = new Map();
+  
+  var lstTaskOfRelatedDate ; */
+  var projectTeamQuery ='';
+  if(selproject!='allproject'){
+    projectTeamQuery='SELECT id,name,sfid,Project__c,Team__c FROM salesforce.Project_Team__c WHERE Project__c=$1';
+    console.log('pppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrrjjjjjjjjjjjjjjeeeccccccccccttttttt');
+    pool.query(projectTeamQuery,[selproject])
+  .then((projTeamResult)=>{
+    console.log('projectTeam '+JSON.stringify(projTeamResult.rows)+'rows '+projTeamResult.rowCount);
+    if(projTeamResult.rowCount<1){
+      console.log('djskdjjksdfjdks');
+      response.send(lstTasksToShow);
+    }
+    else{
+      projTeampram.push('$' + 1);
+      lstProjTeam.push(userId);
+       for(var i = 2; i <= projTeamResult.rows.length; i++) {
+        projTeampram.push('$' + i);
+        lstProjTeam.push(projTeamResult.rows[i-2].team__c);
+      }
+      /* Team ehere team manager is curret uSer or not  */
+      let teamQry = 'SELECT Id, sfid , Manager__c, name FROM salesforce.Team__c WHERE Manager__c = $1 AND sfid IN ('+ projTeampram.join(',')+ ')';
+      console.log('teamQry '+teamQry);
+      pool.query(teamQry,lstProjTeam)
+      .then((teamQueryResult)=>{
+        console.log('team query result ='+JSON.stringify(teamQueryResult.rows));
+        if(teamQueryResult.rowCount>0){
+          for(var i = 1; i <= teamQueryResult.rows.length; i++) {
+            teamParam.push('$' + i);
+            lstTeams.push(teamQueryResult.rows[i-1].sfid);
+          }
+          console.log(' lstTeams '+lstTeams+' teamParam '+teamParam);
+          /* TEAM member   */
+          let teamUserQuery='SELECT Id, sfid,representative__c , team__c FROM salesforce.Team_Member__c WHERE team__c IN ('+ teamParam.join(',')+ ')';
+          console.log('teamUserQuery '+teamUserQuery);
+          pool.query(teamUserQuery,lstTeams) 
+          .then((memberQryResult)=>{
+            console.log('member result '+JSON.stringify(memberQryResult.rows));
+            if(memberQryResult.rowCount>0){
+              teamMember.push(selectedDate);
+              teamMember.push(selproject);
+              teamMemberParam.push('$' + 3);
+              teamMember.push(userId);
+              for(var i = 4; i <= memberQryResult.rows.length+1; i++) {
+                     teamMemberParam.push('$' + i);
+                     teamMember.push(memberQryResult.rows[i-4].representative__c);
+               }
+               /* TAsk Query Started  */
+               teamtskqry='SELECT tsk.Id,tsk.sfid as sfid,tsk.name as tskname,tsk.Project_Name__c, tsk.Start_Date__c,tsk.assigned_manager__c,tsk.Planned_Hours__c,cont.sfid as contid ,cont.name as contname,proj.name as projname '+
+'                   FROM salesforce.Milestone1_Task__c tsk '+
+                    'INNER JOIN salesforce.Contact cont ON tsk.assigned_manager__c = cont.sfid '+
+                   // 'INNER JOIN salesforce.Milestone1_Time__c mileTime ON tsk.sfid = mileTime.project_task__c '+
+                    'INNER JOIN salesforce.Milestone1_Project__c proj ON tsk.Project_Name__c= proj.sfid '+
+                    'WHERE Start_Date__c = $1 AND tsk.Project_Name__c=$2 AND Assigned_Manager__c IN ('+ teamMemberParam.join(',')+ ')'+' AND tsk.sfid != \''+''+'\''; 
+                    console.log('teamtskqry for selected PRoject 1' +teamtskqry +' member Param '+teamMemberParam +'member '+teamMember);
+                    pool.query(teamtskqry,teamMember)
+                    .then((teamtskqueryresult)=>{
+                     // console.log('team task query result '+JSON.stringify(teamtskqueryresult.rows));
+                      lstTasksToShow=teamtskqueryresult.rows;
+                      pool.query('SELECT sfid, date__c, calculated_hours__c, project_Task__c  FROM salesforce.Milestone1_Time__c WHERE sfid IS NOT NULL')
+            .then((timesheetQueryResult)=>{
+              console.log('querryResult '+JSON.stringify(timesheetQueryResult.rows));
+              console.log('lstTasksToShow x'+JSON.stringify(lstTasksToShow));
+              var timesheetMap = new Map();
+              var lstsendResposne=[];
+              for(let i=0; i < timesheetQueryResult.rowCount ; i++)
+              {
+                  console.log('timesheetQueryResult.rows[i].project_Task__c   '+timesheetQueryResult.rows[i].project_task__c +' timesheetQueryResult.rows[i].calculated_hours__c  : '+timesheetQueryResult.rows[i].calculated_hours__c);
+                  timesheetMap.set( timesheetQueryResult.rows[i].project_task__c , timesheetQueryResult.rows[i].calculated_hours__c );
+              }
+              console.log('timesheetMap +'+JSON.stringify(timesheetMap.get('a050p000001xvZ3AAI')));
+              lstTasksToShow.forEach((eachTask)=>{
+                //console.log('each task is :'+eachTask);
+
+                let taskDetail = {};
+                taskDetail.tskname = eachTask.tskname;
+                taskDetail.plannedHours = eachTask.planned_hours__c;
+                if(timesheetMap.has(eachTask.sfid))
+                 taskDetail.actualHours = timesheetMap.get(eachTask.sfid);
+                 else
+                 taskDetail.actualHours = '';
+                 //console.log('Inside Last Loop timesheetMap.get(eachTask.sfid)    '+timesheetMap.get(eachTask.sfid));
+                 console.log('start_date__c '+eachTask.start_date__c);
+                 let dt =eachTask.start_date__c.getTime()+19800000;
+                 let start_date__c=new Date(dt);
+                 console.log('start_date__c new '+start_date__c);
+                 taskDetail.date = start_date__c ;
+
+                 taskDetail.projectName =eachTask.projname;
+                 taskDetail.userName =eachTask.contname;
+                 taskDetail.assigned =eachTask.contid;
+                 taskDetail.currentuser=userName;
+                 taskDetail.projectid=eachTask.project_name__c;
+                lstsendResposne.push(taskDetail);
+              })
+              console.log('lstsendResposne '+JSON.stringify(lstsendResposne));
+              response.send(lstsendResposne);
+
+            }).catch((error)=>{
+              console.log('errororo +'+JSON.stringify(errors.stack));
+            })
+                    })
+                    .catch((tskqueryError)=>{
+                      console.log('tskqueryError '+JSON.stringify(tskqueryError.stack));
+                    })
+               /* Task query ended  */
+            }
+          })
+          .catch((meberError)=>{
+            console.log('error in memberQuery '+JSON.stringify(meberError.stack));
+          })
+
+          /* TEAM member End  */
+        }
+        else{
+          response.send('You are not the team MAneger for the related project');
+        }
+
+      })
+      .catch((teamError)=>{
+        console.log('team error '+JSON,stringify(teamError.stack));
+      })
+      /* ensd of team  */
+
+    }
+    
+    })
+    .catch((error)=>{
+      console.log('error '+JSON.stringify(error.stack));
+    })
+
+  }
+
+  /* Start of all project */
+  else{
+    var projectTeamMap = new Map();
+    var teamProjId=[];
+    projectTeamQuery='SELECT id,name,sfid,Project__c,Team__c FROM salesforce.Project_Team__c WHERE Project__c IS NOT NULL';
+    console.log('All project Team '+projectTeamQuery);
+    pool.query(projectTeamQuery)
+  .then((projTeamResult)=>{
+    console.log('projectTeam allProject'+JSON.stringify(projTeamResult.rows)+'rows '+projTeamResult.rowCount);
+    if(projTeamResult.rowCount<1){
+      console.log('djskdjjksdfjdks');
+      response.send(lstTasksToShow);
+    }
+    else{ 
+      projTeampram.push('$' + 1);
+      lstProjTeam.push(userId);
+       for(var i = 2; i <= projTeamResult.rows.length; i++) {
+        projTeampram.push('$' + i);
+        lstProjTeam.push(projTeamResult.rows[i-2].team__c);
+        projectTeamMap.set(projTeamResult.rows[i-2].team__c,projTeamResult.rows[i-2].project__c);
+      }
+      /* Team Where team manager is curret uSer or not  */
+      let teamQry = 'SELECT Id, sfid , Manager__c, name FROM salesforce.Team__c WHERE Manager__c = $1 AND sfid IN ('+ projTeampram.join(',')+ ')';
+      console.log('teamQry '+teamQry);
+      pool.query(teamQry,lstProjTeam)
+      .then((teamQueryResult)=>{
+        console.log('team query result ='+JSON.stringify(teamQueryResult.rows));
+        if(teamQueryResult.rowCount>0){
+          for(var i = 1; i <= teamQueryResult.rows.length; i++) {
+            teamParam.push('$' + i);
+            lstTeams.push(teamQueryResult.rows[i-1].sfid);
+            if(!(projectTeamMap.has(teamQueryResult[i-1]))){
+              teamProjId.push(projectTeamMap.get(teamQueryResult[i-1]));
+              console.log('hdjds '+projectTeamMap.get(teamQueryResult[i-1]));
+            }
+          }
+          console.log('list of manager Realted project '+teamProjId);
+          console.log(' lstTeams '+lstTeams+' teamParam '+teamParam);
+          /* TEAM member   */
+          let teamUserQuery='SELECT Id, sfid,representative__c , team__c FROM salesforce.Team_Member__c WHERE team__c IN ('+ teamParam.join(',')+ ')';
+          console.log('teamUserQuery '+teamUserQuery);
+          pool.query(teamUserQuery,lstTeams) 
+          .then((memberQryResult)=>{
+            console.log('member result '+JSON.stringify(memberQryResult.rows));
+            if(memberQryResult.rowCount>0){
+              teamMember.push(selectedDate);
+              teamMemberParam.push('$' + 2);
+              teamMember.push(userId);
+              for(var i = 3; i <= memberQryResult.rows.length+1; i++) {
+                     teamMemberParam.push('$' + i);
+                     teamMember.push(memberQryResult.rows[i-3].representative__c);
+               }
+               /* TAsk Query Started  */
+               teamtskqry='SELECT tsk.Id,tsk.sfid,tsk.name as tskname,tsk.Project_Name__c, tsk.Start_Date__c,tsk.assigned_manager__c,tsk.Planned_Hours__c,cont.sfid as contid ,cont.name as contname,proj.name as projname '+
+'                    FROM salesforce.Milestone1_Task__c tsk '+
+                    'INNER JOIN salesforce.Contact cont ON tsk.assigned_manager__c = cont.sfid '+
+                    'INNER JOIN salesforce.Milestone1_Project__c proj ON tsk.Project_Name__c= proj.sfid '+
+                    //'INNER JOIN salesforce.Milestone1_Time__c tmshe ON tsk.sfid = tmshe.Project_Task__c '+
+                    'WHERE Start_Date__c = $1 AND Assigned_Manager__c IN ('+ teamMemberParam.join(',')+ ')'+' AND tsk.sfid != \''+''+'\''; 
+                    console.log('teamtskqry' +teamtskqry +' member Param '+teamMemberParam +'member '+teamMember);
+
+                    pool.query(teamtskqry,teamMember)
+                    .then((teamtskqueryresult)=>{
+                     // console.log('team task query result '+JSON.stringify(teamtskqueryresult.rows));
+                      lstTasksToShow=teamtskqueryresult.rows;
+                      pool.query('SELECT sfid, date__c, calculated_hours__c, project_Task__c  FROM salesforce.Milestone1_Time__c WHERE sfid IS NOT NULL')
+            .then((timesheetQueryResult)=>{
+              console.log('querryResult '+JSON.stringify(timesheetQueryResult.rows));
+              console.log('lstTasksToShow x'+JSON.stringify(lstTasksToShow));
+              var timesheetMap = new Map();
+              var lstsendResposne=[];
+              for(let i=0; i < timesheetQueryResult.rowCount ; i++)
+              {
+                  console.log('timesheetQueryResult.rows[i].project_Task__c   '+timesheetQueryResult.rows[i].project_task__c +' timesheetQueryResult.rows[i].calculated_hours__c  : '+timesheetQueryResult.rows[i].calculated_hours__c);
+                  timesheetMap.set( timesheetQueryResult.rows[i].project_task__c , timesheetQueryResult.rows[i].calculated_hours__c );
+              }
+              console.log('timesheetMap +'+JSON.stringify(timesheetMap.get('a050p000001xvZ3AAI')));
+              lstTasksToShow.forEach((eachTask)=>{
+                //console.log('each task is :'+eachTask);
+
+                let taskDetail = {};
+                taskDetail.tskname = eachTask.tskname;
+                taskDetail.plannedHours = eachTask.planned_hours__c;
+                if(timesheetMap.has(eachTask.sfid))
+                 taskDetail.actualHours = timesheetMap.get(eachTask.sfid);
+                 else
+                 taskDetail.actualHours = '';
+                 //console.log('Inside Last Loop timesheetMap.get(eachTask.sfid)    '+timesheetMap.get(eachTask.sfid));
+                 console.log('start_date__c '+eachTask.start_date__c);
+                 let dt =eachTask.start_date__c.getTime()+19800000;
+                 let start_date__c=new Date(dt);
+                 console.log('start_date__c new '+start_date__c);
+                 taskDetail.date = start_date__c ;
+
+                 taskDetail.projectName =eachTask.projname;
+                 taskDetail.userName =eachTask.contname;
+                 taskDetail.assigned =eachTask.contid;
+                 taskDetail.currentuser=userName;
+                 taskDetail.projectid=eachTask.project_name__c;
+                lstsendResposne.push(taskDetail);
+              })
+              console.log('lstsendResposne '+JSON.stringify(lstsendResposne));
+              response.send(lstsendResposne);
+
+            }).catch((error)=>{
+              console.log('errororo +'+JSON.stringify(errors.stack));
+            })
+                    })
+                    .catch((tskqueryError)=>{
+                      console.log('tskqueryError '+JSON.stringify(tskqueryError.stack));
+                    })
+               /* Task query ended  */
+            }
+          })
+          .catch((meberError)=>{
+            console.log('error in memberQuery '+JSON.stringify(meberError.stack));
+          })
+
+          /* TEAM member End  */
+        }
+        else{
+          response.send('You are not the team MAneger for the related project');
+        }
+
+      })
+      .catch((teamError)=>{
+        console.log('team error '+JSON.stringify(teamError.stack));
+      })
+      /* ensd of team  */
+
+    }
+    
+    })
+    .catch((error)=>{
+      console.log('error '+JSON.stringify(error.stack));
+    })
+
+  }
+
+
+  })
 
  router.get('/getdetails',verify, async(request, response) => {
   

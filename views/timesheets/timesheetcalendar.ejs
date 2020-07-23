@@ -557,6 +557,7 @@
                   }
                   else {
                     alert('team view selected '+$('#Selectview').val());
+                   // if($('#selproject').val()!='allproject'){
                       $.ajax({ 
                         type: 'GET',
                         url: '/timesheets/getTeamdetails',
@@ -568,6 +569,14 @@
                     })
                     .done(function(tskdata){
                       console.log('sample task team view data :'+JSON.stringify(tskdata));
+                      console.log('size of '+tskdata.length);
+                      if(tskdata.length==0){
+                        var tasktableData='<h4>You are Not  Project Team Manager</h4>';
+                        $('#taskDetails').html(tasktableData);
+                          $("#detailsModal").modal("show");
+
+                      }
+                      else{
                       var tasktableData = '';
                           tasktableData  += '<thead>';
                           tasktableData  += '<tr>';
@@ -594,11 +603,13 @@
                       })
                       $('#taskDetails').html(tasktableData);
                           $("#detailsModal").modal("show");
+                    }
                     })
                     .fail(function(jqXHR, textStatus, err){
                       console.log('AJAX error response :',textStatus);
                       $("#detailsModal").modal("show");
-                  })                 
+                  })
+                 // }                    
                   }
                 }
             } 
