@@ -253,10 +253,12 @@
         //  alert(b.format('L'));
             var date = b.format('L');
             console.log('date '+date);
+            $('#Selectview').val('None');
+            $('#selproject').val('None');
         
             $.ajax({ 
                 type: 'GET',
-                url: '/users/getevents',
+                url: '/users/getNullevents',
                 data : {
                     'date': date
                 },
@@ -279,10 +281,12 @@
         //  alert(b.format('L'));
             var date = b.format('L');
             console.log('date '+date);
+            $('#Selectview').val('None');
+            $('#selproject').val('None');
         
             $.ajax({ 
                 type: 'GET',
-                url: '/users/getevents',
+                url: '/users/getNullevents',
                 data : {
                     'date': date
                 },
@@ -478,140 +482,157 @@
                 }
                 else if(calEvent.title == 'Details')
                 {
-                   if($('#Selectview').val() !='teamview' ){
-                   //  alert('select view is : '+$('#Selectview').val());
-                    $.ajax({ 
-                        type: 'GET',
-                        url: '/timesheets/getdetails',
-                        data : {
-                            'date': selectedDate,
-                            'selproject':$('#selproject').val()
-                        },
-                        dataType: 'json'
-                    })
-                    .done(function( taskData ) {
-                        console.log( "Sample of data:", JSON.stringify(taskData));
-                       // var taskData=taskData1.lstTasksToShow;
-                       // console.log('hsadbja '+taskData);
-                        
-                         var selecPro= $('#selproject').val();
-                         var selecView= $('#Selectview').val();
-                        console.log('sleePROJ :'+selecPro +'& selected view ='+selecView);
-                        var tasktableData = '';
-                        tasktableData  += '<thead>';
-                        tasktableData  += '<tr>';
-                        tasktableData  += ' <th>Task Name</th>';
-                        tasktableData  += '<th>Planned Hours</th>';
-                        tasktableData  += '<th>Actual Hours</th>';
-                        tasktableData  += '<th>Date</th>';
-                        tasktableData  += ' <th>Project Name</th>';
-                        tasktableData  += ' <th>Assigned Resource</th>';
-                        tasktableData  += '</tr>';
-                        tasktableData  += '</thead>';    
-                                
-                        taskData.forEach((eachTaskCol) => {
-                          // var dt=eachTaskCol.date.getTime()+86400000;
-                          if(selecPro=='allproject' && selecView =='currentuser')
-                             {
-                               if(eachTaskCol.userName==eachTaskCol.currentuser){
-                                console.log('dt '+eachTaskCol.date);
-                                console.log('date str '+eachTaskCol.date.toString().split('T')[0]);
-                                var strDate = eachTaskCol.date.toString().split('T')[0];
-                                tasktableData += '<tr>';
-                                tasktableData  += '<td>'+eachTaskCol.name+'</td>';
-                                tasktableData  += '<td>'+eachTaskCol.plannedHours+'</td>';
-                                tasktableData  += '<td>'+eachTaskCol.actualHours+'</td>';
-                                tasktableData  += '<td>'+strDate+'</td>';
-                                tasktableData  += '<td>'+eachTaskCol.projectName+'</td>';
-                                tasktableData  += '<td>'+eachTaskCol.userName+'</td>';
-                                tasktableData += '</tr>';
-                               }
-                             }
-                             if(selecPro!='allproject' && selecView =='currentuser')
-                              {
-                                console.log('inside particular project current user');
-                                if((eachTaskCol.userName==eachTaskCol.currentuser)&&(selecPro==eachTaskCol.projectid))
-                                {                                     
-                                  console.log('dt '+eachTaskCol.date);
-                                   console.log('date str '+eachTaskCol.date.toString().split('T')[0]);
-                                var strDate = eachTaskCol.date.toString().split('T')[0];
-                                tasktableData += '<tr>';
-                                tasktableData  += '<td>'+eachTaskCol.name+'</td>';
-                                tasktableData  += '<td>'+eachTaskCol.plannedHours+'</td>';
-                                tasktableData  += '<td>'+eachTaskCol.actualHours+'</td>';
-                                tasktableData  += '<td>'+strDate+'</td>';
-                                tasktableData  += '<td>'+eachTaskCol.projectName+'</td>';
-                                tasktableData  += '<td>'+eachTaskCol.userName+'</td>';
-                                tasktableData += '</tr>';
-                                  }
-                                } 
-                        });
-                       // $('#taskDetails').append(tasktableData);
-                        $('#taskDetails').html(tasktableData);
-                        $("#detailsModal").modal("show");
-                    })
-                    .fail(function(jqXHR, textStatus, err){
-                        console.log('AJAX error response :',textStatus);
-                        $("#detailsModal").modal("show");
-                    })     
-                  }
-                  else {
-                    alert('team view selected '+$('#Selectview').val());
-                   // if($('#selproject').val()!='allproject'){
-                      $.ajax({ 
-                        type: 'GET',
-                        url: '/timesheets/getTeamdetails',
-                        data : {
-                            'date': selectedDate,
-                            'selproject':$('#selproject').val()
-                        },
-                        dataType: 'json'
-                    })
-                    .done(function(tskdata){
-                      console.log('sample task team view data :'+JSON.stringify(tskdata));
-                      console.log('size of '+tskdata.length);
-                      if(tskdata.length==0){
-                        var tasktableData='<h4>You are Not  Project Team Manager</h4>';
-                        $('#taskDetails').html(tasktableData);
-                          $("#detailsModal").modal("show");
+                  var selecPro= $('#selproject').val();
+                  var selecView= $('#Selectview').val();
+                  console.log('selecPro : '+selecPro +' selecView: '+selecView);
+                  $("#detailsModal").modal("show");
+                  // start projectselected and curren user
+                  if(selecPro!='allproject' && selecView =='currentuser'){
+                    alert('selected project & currentUSer');
+                    //  alert('select view is : '+$('#Selectview').val());
+                     $.ajax({ 
+                         type: 'GET',
+                         url: '/timesheets/getdetailsproject',
+                         data : {
+                             'date': selectedDate,
+                             'selproject':$('#selproject').val()
+                         },
+                         dataType: 'json'
+                     })
+                     .done(function( taskData ) {
+                         console.log( "Sample of data:", JSON.stringify(taskData));
+                         console.log('sleePROJ :'+selecPro +'& selected view ='+selecView);
+                         var tasktableData = ''; 
+                         tasktableData  += '<thead><tr><th>Task Name</th><th>Planned Hours</th><th>Actual Hours</th><th>Date</th><th>Project Name</th><th>Assigned Resource</th></tr></thead>';    
+                         taskData.forEach((eachTaskCol) => {  
+                                 console.log('dt '+eachTaskCol.date);
+                                 console.log('date str '+eachTaskCol.date.toString().split('T')[0]);
+                                 var strDate = eachTaskCol.date.toString().split('T')[0];
+                                 tasktableData += '<tr>';
+                                 tasktableData  += '<td>'+eachTaskCol.name+'</td>';
+                                 tasktableData  += '<td>'+eachTaskCol.plannedHours+'</td>';
+                                 tasktableData  += '<td>'+eachTaskCol.actualHours+'</td>';
+                                 tasktableData  += '<td>'+strDate+'</td>';
+                                 tasktableData  += '<td>'+eachTaskCol.projectName+'</td>';
+                                 tasktableData  += '<td>'+eachTaskCol.userName+'</td>';
+                                 tasktableData += '</tr>';   
+                         });
+                        // $('#taskDetails').append(tasktableData);
+                         $('#taskDetails').html(tasktableData);
+                         $("#detailsModal").modal("show");
+                     })
+                     .fail(function(jqXHR, textStatus, err){
+                         console.log('AJAX error response :',textStatus);
+                         $("#detailsModal").modal("show");
+                     })     
+                   } 
+                  
+                //   <!-- End OF CurrenntUSER selected project -->
 
-                      }
-                      else{
-                      var tasktableData = '';
-                          tasktableData  += '<thead>';
-                          tasktableData  += '<tr>';
-                          tasktableData  += ' <th>Task Name</th>';
-                          tasktableData  += '<th>Planned Hours</th>';
-                          tasktableData  += '<th>Actual Hours</th>';
-                          tasktableData  += '<th>Date</th>';
-                          tasktableData  += ' <th>Project Name</th>';
-                          tasktableData  += ' <th>Assigned Resource</th>';
-                          tasktableData  += '</tr>';
-                          tasktableData  += '</thead>'; 
-                          tskdata.forEach((eachTaskCol) => {
-                          console.log('dt '+eachTaskCol.date);
-                          console.log('date str '+eachTaskCol.date.toString().split('T')[0]);
-                           var strDate = eachTaskCol.date.toString().split('T')[0];
-                       tasktableData += '<tr>';
-                       tasktableData  += '<td>'+eachTaskCol.tskname+'</td>';
-                       tasktableData  += '<td>'+eachTaskCol.plannedHours+'</td>';
-                       tasktableData  += '<td>'+eachTaskCol.actualHours+'</td>';
-                       tasktableData  += '<td>'+strDate+'</td>';
-                       tasktableData  += '<td>'+eachTaskCol.projectName+'</td>';
-                       tasktableData  += '<td>'+eachTaskCol.userName+'</td>';
-                       tasktableData += '</tr>';
-                      })
-                      $('#taskDetails').html(tasktableData);
-                          $("#detailsModal").modal("show");
-                    }
-                    })
-                    .fail(function(jqXHR, textStatus, err){
-                      console.log('AJAX error response :',textStatus);
+                // all project current user 
+                if(selecPro=='allproject' && selecView =='currentuser'){
+                    alert('selected project & currentUSer');
+                    //  alert('select view is : '+$('#Selectview').val());
+                     $.ajax({ 
+                         type: 'GET',
+                         url: '/timesheets/getdetails',
+                         data : {
+                             'date': selectedDate,
+                             'selproject':$('#selproject').val()
+                         },
+                         dataType: 'json'
+                     })
+                     .done(function( taskData ) {
+                         console.log( "Sample of data:", JSON.stringify(taskData));
+                         console.log('sleePROJ :'+selecPro +'& selected view ='+selecView);
+                         var tasktableData = ''; 
+                         tasktableData  += '<thead><tr><th>Task Name</th><th>Planned Hours</th><th>Actual Hours</th><th>Date</th><th>Project Name</th><th>Assigned Resource</th></tr></thead>';    
+                         taskData.forEach((eachTaskCol) => {  
+                                 console.log('dt '+eachTaskCol.date);
+                                 console.log('date str '+eachTaskCol.date.toString().split('T')[0]);
+                                 var strDate = eachTaskCol.date.toString().split('T')[0];
+                                 tasktableData += '<tr>';
+                                 tasktableData  += '<td>'+eachTaskCol.name+'</td>';
+                                 tasktableData  += '<td>'+eachTaskCol.plannedHours+'</td>';
+                                 tasktableData  += '<td>'+eachTaskCol.actualHours+'</td>';
+                                 tasktableData  += '<td>'+strDate+'</td>';
+                                 tasktableData  += '<td>'+eachTaskCol.projectName+'</td>';
+                                 tasktableData  += '<td>'+eachTaskCol.userName+'</td>';
+                                 tasktableData += '</tr>';   
+                         });
+                        // $('#taskDetails').append(tasktableData);
+                         $('#taskDetails').html(tasktableData);
+                         $("#detailsModal").modal("show");
+                     })
+                     .fail(function(jqXHR, textStatus, err){
+                         console.log('AJAX error response :',textStatus);
+                         $("#detailsModal").modal("show");
+                     })     
+                   } 
+                //end of current user all project
+
+                // start of team view 
+                if(selecView =='teamview'){
+                  console.log('Team view detail action');
+                  $("#detailsModal").modal("show");
+                  $.ajax({ 
+                    type: 'GET',
+                    url: '/timesheets/getTeamdetails',
+                    data : {
+                        'date': selectedDate,
+                        'selproject':$('#selproject').val()
+                    },
+                    dataType: 'json'
+                })
+                .done(function(tskdata){
+                  console.log('sample task team view dataxx :'+JSON.stringify(tskdata));
+                 // console.log('size of '+tskdata.length+'  ; '+tskdata[0].name);
+                  if(tskdata.length==0){
+                    var tasktableData='<h4>You are Not Team Manager for this Project or No task Available </h4>';
+                    $('#taskDetails').html(tasktableData);
                       $("#detailsModal").modal("show");
-                  })
-                 // }                    
+
                   }
+                  else{
+                  var tasktableData = '';
+                      tasktableData  += '<thead>';
+                      tasktableData  += '<tr>';
+                      tasktableData  += ' <th>Task Name</th>';
+                      tasktableData  += '<th>Planned Hours</th>';
+                      tasktableData  += '<th>Actual Hours</th>';
+                      tasktableData  += '<th>Date</th>';
+                      tasktableData  += ' <th>Project Name</th>';
+                      tasktableData  += ' <th>Assigned Resource</th>';
+                      tasktableData  += '</tr>';
+                      tasktableData  += '</thead>'; 
+                      tskdata.forEach((eachTaskCol) => {
+                        console.log('achdad'+eachTaskCol);
+                        console.log('dt '+eachTaskCol.date);
+                        console.log('date str '+eachTaskCol.date.toString().split('T')[0]);
+                        var strDate = eachTaskCol.date.toString().split('T')[0];
+                        tasktableData += '<tr>';
+                        tasktableData  += '<td>'+eachTaskCol.name+'</td>';
+                        tasktableData  += '<td>'+eachTaskCol.plannedHours+'</td>';
+                        tasktableData  += '<td>'+eachTaskCol.actualHours+'</td>';
+                        tasktableData  += '<td>'+strDate+'</td>';
+                        tasktableData  += '<td>'+eachTaskCol.projectName+'</td>';
+                        tasktableData  += '<td>'+eachTaskCol.userName+'</td>';
+                        tasktableData += '</tr>';  
+                  })
+                  $('#taskDetails').html(tasktableData);
+                      $("#detailsModal").modal("show");
                 }
+                })
+                .fail(function(jqXHR, textStatus, err){
+                  console.log('AJAX error response :',textStatus);
+                  $("#detailsModal").modal("show");
+              })
+
+                }
+
+                // end of team view
+                
+                  } 
             } 
         });
         var colorStyle = document.getElementsByClassName('fc-title');
@@ -680,7 +701,7 @@
         <div class="form-group">
           <div class="row">
             <div class="col-md-6">
-              <label for="validationTooltip02">Assigned Resource</label>
+              <label for="validationTooltip02">Assign to Heroku user</label>
               <select class="custom-select custom-select-sm form-control" name="assignedresource">
                 <option value="" >None</option>
                   <% if(contactList.length != 0) { %>
@@ -865,9 +886,7 @@
     </div>
     <div class="modal-body">
       <table id="taskDetails" class="table table-hover striped table-responsive" >
-        <thead>
-            
-        </thead>
+        
       </table>
     </div>
     <div class="modal-footer">
