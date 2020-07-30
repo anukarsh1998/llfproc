@@ -4,7 +4,6 @@
 <% include ../partials/footer %>
 
 
-
 <style>
 
    
@@ -197,6 +196,8 @@
                                                   </table>
                                               <!-- Particular Expense Details-->
                                           </div>
+                                          
+                                          
                                           <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
                                               <div class="accordion" id="accordionExample">
                                                   <div class="card">
@@ -689,7 +690,7 @@
               }
           })
           .done((expenseRelatedData) => {
-            
+             let id='nav-home';
               let expenseRecord = expenseRelatedData.Expense[0];
               console.log('expenseList  '+JSON.stringify(expenseRecord));
 
@@ -762,8 +763,10 @@
               expenseTableRows += '<td>'+expenseRecord.conveyance_amount__c+'</td>';
               expenseTableRows += '<td><strong>Tour Bill Claim Amount<strong></td>';
               expenseTableRows += '<td>'+expenseRecord.tour_bill_claim__c+'</td>';
-              expenseTableRows += '</tr>';   
-
+              expenseTableRows += '</tr>';  
+              expenseTableRows += '<tr>'+'<td>'+'<input type="button" onclick="printDiv()" value="!Click to Print!" />'+'</td></tr>';
+               
+              
               //$('#expenseTable').append(expenseTableRows);
               $('#expenseDetailsSpinner').hide();
               $('#expenseTable').empty();
@@ -1167,6 +1170,19 @@
         })
 
       });
+
+
+      function printDiv(divName) {
+        var printContents = document.getElementById(divName).innerHTML;
+        var originalContents = document.body.innerHTML;
+   
+        document.body.innerHTML = printContents;
+   
+        window.print();
+   
+        document.body.innerHTML = originalContents;
+   }
+      
 </script>
 
 
