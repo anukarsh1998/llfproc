@@ -7,6 +7,7 @@ const multer = require('multer');
 const Router = require('express-promise-router');
 const format = require('pg-format');
 const joi = require('@hapi/joi');
+const { request, response } = require('express');
 const router = new Router()
 
 router.get('/testQuery',(resquest, response) => {
@@ -197,6 +198,7 @@ router.get('/expenseAllRecords',verify, async (request, response) => {
                 obj.pettyCashAmount = expenseQueryResult.rows[i].petty_cash_amount__c;
                 obj.conveyanceVoucherAmount = expenseQueryResult.rows[i].conveyance_amount__c;
                 obj.createdDate = strDate;
+                obj.print='<button    data-toggle="modal" data-target="#popupPrint" class="btn btn-primary printexp"   id="print'+expenseQueryResult.rows[i].sfid+'" >Print</button>';
                 if(expenseQueryResult.rows[i].isherokueditbuttondisabled__c)
                   obj.editButton = '<button    data-toggle="modal" data-target="#popupEdit" class="btn btn-primary expIdEditMode"   id="edit'+expenseQueryResult.rows[i].sfid+'" >Edit</button>';
                 else
@@ -440,6 +442,121 @@ router.get('/details', async (request, response) => {
     console.log('objData '+JSON.stringify(objData));
     response.send(objData);
 });
+
+
+router.get('/printdetails',async(request,response)=>{
+  var expenseId = request.query.expenseId;
+    console.log('Hurrah expenseId '+expenseId);
+    var tourBillClaimId=[];
+    var tourBillCaimParam=[];
+    var airRailBusQuery='';
+    var conveyanceChargeQuery='';
+    var boardinglodgingQuery='';
+    var telephoneFoodQuery='';
+    var miscellaneousQuery='';
+    var expenseQueryText = 'SELECT id,sfid,Name, Project_Name__c, Department__c, Designation__c, '+
+    ' Conveyance_Employee_Category_Band__c,Employee_ID__c, Project_Manager_Status__c, Accounts_Status__c , '+
+    'Approval_Status__c, Amount_Claimed__c, petty_cash_amount__c, Conveyance_Amount__c, Tour_Bill_Claim__c '+
+    'FROM salesforce.Milestone1_Expense__c WHERE sfid = $1';
+     var pettyCashQueryText = 'SELECT petty.sfid as sfid, petty.name as name, petty.Activity_Code_Project__c, petty.Bill_No__c,act.name as actname, petty.Bill_Date__c,petty.Nature_of_exp__c, petty.Amount__c '+
+    'FROM salesforce.Petty_Cash_Expense__c petty '+
+    'INNER JOIN salesforce.Activity_Code__c act ON petty.Activity_Code_Project__c = act.sfid '+
+    'WHERE Expense__c = $1';  
+    console.log('jdcj '+pettyCashQueryText);
+    var conveyanceQueryText = 'SELECT  con.sfid, con.Name as name, con.Amount__c, con.Mode_of_Conveyance__c, con.From__c,con.To__c,con.Kms_Travelled__c,act.name as actname '+
+    'FROM salesforce.Conveyance_Voucher__c con '+
+    'INNER JOIN salesforce.Activity_Code__c act ON con.Activity_Code_Project__c = act.sfid '+
+    'WHERE Expense__c = $1';
+    var tourBillClaimQueryText = 'SELECT id, sfid, Name, Grand_Total__c,Grand__c FROM salesforce.Tour_Bill_Claim__c WHERE Expense__c = $1 ';
+    
+    var objData =  {};
+    try{
+
+      await pool.query(expenseQueryText,[expenseId])
+      .then((expenseQueryResult) => {
+              console.log('Expense Result '+JSON.stringify(expenseQueryResult.rows));
+              objData.Expense = expenseQueryResult.rows;
+      })
+      .catch(expenseQueryError => console.log('expenseQueryError   :'+expenseQueryError.stack))
+
+
+      await pool.query(pettyCashQueryText,[expenseId])
+      .then(pettyCashQueryResult => {console.log('Petty Cash Result '+JSON.stringify(pettyCashQueryResult.rows))
+              objData.PettyCash = pettyCashQueryResult.rows;
+      })
+      .catch(pettyCashQueryError => console.log('pettyCashQueryError  : '+pettyCashQueryError.stack))
+      
+      await pool.query(conveyanceQueryText,[expenseId])
+      .then((conveyanceQueryResult) => {
+              console.log('Conveyance Result '+JSON.stringify(conveyanceQueryResult.rows));
+              objData.Conveyance = conveyanceQueryResult.rows;
+      })
+      .catch(conveyanceQueryError => console.log('conveyanceQueryError   :'+conveyanceQueryError.stack))
+
+      await pool.query(tourBillClaimQueryText,[expenseId])
+      .then((tourBillClaimResult) => {
+          console.log('Tour BillClaim Result '+JSON.stringify(tourBillClaimResult.rows));
+          objData.TourBillClaim = tourBillClaimResult.rows;
+          for(var i=1;i<=tourBillClaimResult.rowCount;i++){
+            tourBillCaimParam.push('$'+i);
+            tourBillClaimId.push(tourBillClaimResult.rows[i-1].sfid);
+          }
+          console.log('tourBillCaimParam '+tourBillCaimParam+'  @tourBillClaimId'+tourBillClaimId );
+          airRailBusQuery = 'SELECT air.sfid, air.Name as name, air.Departure_Date__c, air.Arrival_Date__c,air.Departure_Station__c,'+ 
+          'air.Arrival_Station__c,air.Amount__c, Tour_Bill_Claim__c, Activity_Code_Project__c,act.name as actname, tour.name as tourname '+
+          'FROM salesforce.Air_Rail_Bus_Fare__c air '+
+          'INNER JOIN salesforce.Activity_Code__c act ON air.Activity_Code_Project__c = act.sfid '+
+          'INNER JOIN salesforce.Tour_Bill_Claim__c tour ON air.Tour_Bill_Claim__c = tour.sfid '+
+          'WHERE Tour_Bill_Claim__c IN ('+ tourBillCaimParam.join(',')+ ')';
+           console.log('airRailBusQuery '+airRailBusQuery);
+           // Conveyance charge Query Result
+           conveyanceChargeQuery='SELECT conch.sfid,conch.Name as name,conch.Date__c,conch.Amount__c,conch.Place__c,'+ 
+           'conch.Remarks__c,act.name as actname,tour.name as tourname,conch.Project_Tasks__c '+
+           'FROM salesforce.Conveyance_Charges__c conch '+
+           'INNER JOIN salesforce.Activity_Code__c act ON conch.Activity_Code_Project__c = act.sfid '+
+           'INNER JOIN salesforce.Tour_Bill_Claim__c tour ON conch.Tour_Bill_Claim__c = tour.sfid '+
+           'WHERE Tour_Bill_Claim__c IN ('+ tourBillCaimParam.join(',')+ ')';
+           // boardinglodgingQuery query  
+           boardinglodgingQuery='SELECT sfid, Name, Tour_Bill_Claim__c, Stay_Option__c, Place_Journey__c,'+ 
+           'Correspondence_City__c, Activity_Code__c, Own_Stay_Amount__c, Project_Tasks__c , From__c, To__c,'+
+           'No_of_Days__c,Heroku_Image_URL__c,Daily_Allowance__c,Amount_of_B_L_as_per_policy__c Total_time__c, Actual_Amount_for_boarding_and_lodging__c, Amount_for_boarding_and_lodging__c,'+
+           'Total_Amount__c, Extra_Amount__c, Total_Allowance__c '+
+           'FROM salesforce.Boarding_Lodging__c board '+
+           'WHERE Tour_Bill_Claim__c IN ('+ tourBillCaimParam.join(',')+ ')';
+      })
+      .catch(tourBillClaimQueryError => console.log('tourBillClaimQueryError   :'+tourBillClaimQueryError.stack))
+    
+      await pool.query(airRailBusQuery,tourBillClaimId)
+      .then((airRailBusQueryResult) => {
+              console.log('airRailBusQueryResult Result '+JSON.stringify(airRailBusQueryResult.rows));
+              objData.airRailBus = airRailBusQueryResult.rows;
+      })
+      .catch(airRailBusQueryerror => console.log('airRailBusQueryerror   :'+airRailBusQueryerror.stack))
+
+      await pool.query(conveyanceChargeQuery,tourBillClaimId)
+      .then((conveyanceChargeQueryResult) => {
+              console.log('conveyanceChargeQueryResult Result '+JSON.stringify(conveyanceChargeQueryResult.rows));
+              objData.conveyanceCharge = conveyanceChargeQueryResult.rows;
+      })
+      .catch(conveyanceChargeQueryError => console.log('conveyanceChargeQueryError   :'+conveyanceChargeQueryError.stack))
+
+      await pool.query(boardinglodgingQuery,tourBillClaimId)
+      .then((boardinglodgingQueryResut) => {
+              console.log('boardinglodgingQueryResut Result '+JSON.stringify(boardinglodgingQueryResut.rows));
+              objData.boarding = boardinglodgingQueryResut.rows;
+      })
+      .catch(boardinglodgingQueryError => console.log('boardinglodgingQueryError   :'+boardinglodgingQueryError.stack))
+
+
+     
+  }
+  catch(err){
+      console.log('error async await '+err);
+  }
+  console.log('objData '+JSON.stringify(objData));
+  response.send(objData);
+
+})
 
 
 
