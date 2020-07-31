@@ -517,12 +517,29 @@ router.get('/printdetails',async(request,response)=>{
            'INNER JOIN salesforce.Tour_Bill_Claim__c tour ON conch.Tour_Bill_Claim__c = tour.sfid '+
            'WHERE Tour_Bill_Claim__c IN ('+ tourBillCaimParam.join(',')+ ')';
            // boardinglodgingQuery query  
-           boardinglodgingQuery='SELECT sfid, Name, Tour_Bill_Claim__c, Stay_Option__c, Place_Journey__c,'+ 
-           'Correspondence_City__c, Activity_Code__c, Own_Stay_Amount__c, Project_Tasks__c , From__c, To__c,'+
-           'No_of_Days__c,Heroku_Image_URL__c,Daily_Allowance__c,Amount_of_B_L_as_per_policy__c Total_time__c, Actual_Amount_for_boarding_and_lodging__c, Amount_for_boarding_and_lodging__c,'+
-           'Total_Amount__c, Extra_Amount__c, Total_Allowance__c '+
+           boardinglodgingQuery='SELECT board.sfid, board.Name as name,board.Stay_Option__c,board.Place_Journey__c,board.Correspondence_City__c,board.Activity_Code_Project__c,board.Own_Stay_Amount__c,board.Project_Tasks__c ,board.From__c,board.To__c,'+
+           'board.No_of_Days__c,board.Daily_Allowance__c,board.Amount_of_B_L_as_per_policy__c,board.Total_time__c, board.Actual_Amount_for_boarding_and_lodging__c,board.Amount_for_boarding_and_lodging__c, '+
+           'board.Total_Amount__c,board.Extra_Amount__c,board.Total_Allowance__c, act.name as actname,tour.name as tourname '+
            'FROM salesforce.Boarding_Lodging__c board '+
+           'INNER JOIN salesforce.Activity_Code__c act ON board.Activity_Code_Project__c = act.sfid '+
+           'INNER JOIN salesforce.Tour_Bill_Claim__c tour ON board.Tour_Bill_Claim__c = tour.sfid '+
            'WHERE Tour_Bill_Claim__c IN ('+ tourBillCaimParam.join(',')+ ')';
+           console.log('boardinglodgingQuery '+boardinglodgingQuery);
+
+           telephoneFoodQuery='SELECT telephn.sfid,telephn.Name as name, telephn.Laundry_Expense__c,telephn.Fooding_Expense__c,telephn.Remarks__c,'+ 
+           'telephn.Total_Amount__c, act.name as actname,tour.name as tourname '+
+           'FROM salesforce.Telephone_Fooding_Laundry_Expenses__c telephn '+
+           'INNER JOIN salesforce.Activity_Code__c act ON telephn.Activity_Code_Project__c = act.sfid '+
+           'INNER JOIN salesforce.Tour_Bill_Claim__c tour ON telephn.Tour_Bill_Claim__c = tour.sfid '+
+           'WHERE Tour_Bill_Claim__c IN ('+ tourBillCaimParam.join(',')+ ')';
+
+           miscellaneousQuery='SELECT misc.sfid,misc.Name,misc.Date__c,misc.Amount__c,misc.Particulars_Mode__c,'+ 
+           'misc.Remarks__c,misc.Tour_Bill_Claim__c,act.name as actname,tour.name as tourname '+
+           'FROM salesforce.Miscellaneous_Expenses__c misc '+
+           'INNER JOIN salesforce.Activity_Code__c act ON misc.Activity_Code_Project__c = act.sfid '+
+           'INNER JOIN salesforce.Tour_Bill_Claim__c tour ON misc.Tour_Bill_Claim__c = tour.sfid '+
+           'WHERE Tour_Bill_Claim__c IN ('+ tourBillCaimParam.join(',')+ ')';
+           
       })
       .catch(tourBillClaimQueryError => console.log('tourBillClaimQueryError   :'+tourBillClaimQueryError.stack))
     
@@ -546,6 +563,21 @@ router.get('/printdetails',async(request,response)=>{
               objData.boarding = boardinglodgingQueryResut.rows;
       })
       .catch(boardinglodgingQueryError => console.log('boardinglodgingQueryError   :'+boardinglodgingQueryError.stack))
+
+
+      await pool.query(telephoneFoodQuery,tourBillClaimId)
+      .then((telephoneFoodQueryresult) => {
+              console.log('telephoneFoodQueryresult Result '+JSON.stringify(telephoneFoodQueryresult.rows));
+              objData.telephone= telephoneFoodQueryresult.rows;
+      })
+      .catch(telephoneFoodQueryerror => console.log('telephoneFoodQueryerror   :'+telephoneFoodQueryerror.stack))
+
+      await pool.query(miscellaneousQuery,tourBillClaimId)
+      .then((miscellaneousQueryresult) => {
+              console.log('miscellaneousQueryresult Result '+JSON.stringify(miscellaneousQueryresult.rows));
+              objData.miscell= miscellaneousQueryresult.rows;
+      })
+      .catch(miscellaneousQueryerror => console.log('miscellaneousQueryerror   :'+miscellaneousQueryerror.stack))
 
 
      
