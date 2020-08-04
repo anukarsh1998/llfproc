@@ -392,8 +392,8 @@
 <div id="popupPrint" class="modal fade">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Expense</h5>
+      <div class="modal-header" >
+        <h5 style="margin-left: 220px;" class="modal-title">Expense Information </h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -424,7 +424,7 @@
       </div>
       </div>
       <div class="modal-footer">
-        <button type="button" onclick="printDiv('printExpensediv')" value="click to print!" >click to Print</button>
+        <button type="button" onclick="printDiv('printExpensediv')" value="Click to print!" >click to Print</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
@@ -1261,12 +1261,12 @@ $('.printexp').on('click', function(event){
               let pettyCashTableRows='';
               pettyCashTableRows = '<thead>';
               pettyCashTableRows += '<tr>';
-              pettyCashTableRows += '<td colspan="6 style="background-color:#d3d3d3;padding:5px;"><h5 style="padding-left:5px;">PettyCash Information</h5></td>';    
+              pettyCashTableRows += '<td colspan="6" style="background-color:#d3d3d3;padding:5px;"><h5 style="padding-left:5px;">Petty Cash Information</h5></td>';    
               pettyCashTableRows += '</tr>';
               pettyCashTableRows += '<tr><th>Name</th>';
               pettyCashTableRows += '<th>Total Amount</th>';
               pettyCashTableRows += '<th>Nature Of Expense</th>';
-              pettyCashTableRows += '<th>Activity Code Number</th>';
+              pettyCashTableRows += '<th>Activity Code</th>';
               pettyCashTableRows += '<th>Bill Number</th>';
               pettyCashTableRows += '<th>Bill Date</th>';
               pettyCashTableRows += '</tr></thead>';
@@ -1290,28 +1290,29 @@ $('.printexp').on('click', function(event){
               
               let conveyanceVoucherList =  data.Conveyance;
               console.log('conveyanceVoucherList  '+JSON.stringify(conveyanceVoucherList));
-              let conveyanceVoucherListLength = conveyanceVoucherList.length;
+              let conveyanceVoucherListLength =  conveyanceVoucherList.length;
+              console.log('zizwek'+conveyanceChargeListLength);
 
               let conveyanceVoucherTableRows = '';
+             
+                conveyanceVoucherTableRows += '<thead>';
+                conveyanceVoucherTableRows += '<tr>';
+                conveyanceVoucherTableRows += '<td colspan="6" style="background-color:#d3d3d3;padding:5px;"><h5 style="padding-left:5px;">Conveyance Voucher Information</h5></td>';    
+                conveyanceVoucherTableRows += '</tr>';
+                conveyanceVoucherTableRows += '<tr><th>Conveyance Voucher ID</th>';//Conveyance Voucher ID
+                conveyanceVoucherTableRows += '<th>Amount</th>';
+                conveyanceVoucherTableRows += '<th>Mode Of Conveyance</th>';
+                conveyanceVoucherTableRows += '<th>Activity Code</th>';
+                conveyanceVoucherTableRows += '<th>From</th>';
+                conveyanceVoucherTableRows += '<th>To</th>';
+                conveyanceVoucherTableRows += '</tr></thead>';
+              
 
               for(let i=0 ;i < conveyanceVoucherListLength ; i++)
               {
                 var strDate = conveyanceVoucherList[i].from__c.toString().split('T')[0];
                 var strDate1 = conveyanceVoucherList[i].to__c.toString().split('T')[0];
-                if(i== 0)
-                {
-                  conveyanceVoucherTableRows += '<thead>';
-                  conveyanceVoucherTableRows += '<tr>';
-                  conveyanceVoucherTableRows += '<td colspan="6" style="background-color:#d3d3d3;padding:5px;"><h5 style="padding-left:5px;">ConveyanceVoucher Information</h5></td>';    
-                  conveyanceVoucherTableRows += '</tr>';
-                  conveyanceVoucherTableRows += '<tr><th>Conveyance Voucher ID</th>';//Conveyance Voucher ID
-                  conveyanceVoucherTableRows += '<th>Amount</th>';
-                  conveyanceVoucherTableRows += '<th>Mode Of Conveyance</th>';
-                  conveyanceVoucherTableRows += '<th>Ativity Code</th>';
-                  conveyanceVoucherTableRows += '<th>From</th>';
-                  conveyanceVoucherTableRows += '<th>To</th>';
-                  conveyanceVoucherTableRows += '</tr></thead>';
-                }
+            
                 conveyanceVoucherTableRows += '<tr>';
                 conveyanceVoucherTableRows += '<td>'+conveyanceVoucherList[i].name+'</td>';
                 conveyanceVoucherTableRows += '<td>'+conveyanceVoucherList[i].amount__c+'</td>';
@@ -1329,27 +1330,26 @@ $('.printexp').on('click', function(event){
               console.log('airBustlist '+JSON.stringify(airBustlist));
               var airRailBusListLength=airBustlist.length;
               let AirRailBustTableRow = '';
-
-              for(let i=0 ;i < airRailBusListLength ; i++)
-              {
-                var strDate = airBustlist[i].departure_date__c.toString().split('T')[0];
-                var strDate1 = airBustlist[i].arrival_date__c.toString().split('T')[0];
-                if(i== 0)
-                {
+              
                 AirRailBustTableRow += '<thead>';
                 AirRailBustTableRow += '<tr>';
-                AirRailBustTableRow += '<td colspan="8" style="background-color:#d3d3d3;padding:5px;"><h5 style="padding-left:5px;">AirRailBus Information</h5></td>';    
+                AirRailBustTableRow += '<td colspan="8" style="background-color:#d3d3d3;padding:5px;"><h5 style="padding-left:5px;">Air/Rail/Bus Information</h5></td>';    
                 AirRailBustTableRow += '</tr>';
                 AirRailBustTableRow += '<tr><th>Air Rail Name</th>';
                 AirRailBustTableRow += '<th>Amount</th>';
                 AirRailBustTableRow += '<th>Departure Station</th>';
                 AirRailBustTableRow += '<th>Arrival Station</th>';
-                AirRailBustTableRow += '<th>Ativity Code</th>';
+                AirRailBustTableRow += '<th>Activity Code</th>';
                 AirRailBustTableRow += '<th>From</th>';
                 AirRailBustTableRow += '<th>To</th>';
                 AirRailBustTableRow += '<th>Tour Bill Claim</th>';
                 AirRailBustTableRow += '</tr></thead>';
-              }
+              
+              for(let i=0 ;i < airRailBusListLength ; i++)
+              {
+                var strDate = airBustlist[i].departure_date__c.toString().split('T')[0];
+                var strDate1 = airBustlist[i].arrival_date__c.toString().split('T')[0];
+                
               AirRailBustTableRow += '<tr>';
               AirRailBustTableRow += '<td>'+airBustlist[i].name+'</td>';
               AirRailBustTableRow += '<td>'+airBustlist[i].amount__c+'</td>';
@@ -1369,26 +1369,26 @@ $('.printexp').on('click', function(event){
               console.log('conveyanceChargelist '+JSON.stringify(conveyanceChargelist));
               var conveyanceChargeListLength=conveyanceChargelist.length;
               let conveyaneChargeTableRow = '';
+              
+                conveyaneChargeTableRow += '<thead>';
+                conveyaneChargeTableRow += '<tr>';
+                conveyaneChargeTableRow += '<td colspan="7"  style="background-color:#d3d3d3;padding:5px;"><h5 style="padding-left:5px;">Conveyance Charge Information</h5></td>';    
+                conveyaneChargeTableRow += '</tr>';
+                conveyaneChargeTableRow += '<tr><th>Conveyance Charges Name</th>';
+                conveyaneChargeTableRow += '<th>Amount</th>';
+                conveyaneChargeTableRow += '<th>Date</th>';
+                conveyaneChargeTableRow += '<th> Place</th>';
+                conveyaneChargeTableRow += '<th>Activity Code</th>';
+                conveyaneChargeTableRow += '<th>Remarks</th>';
+                conveyaneChargeTableRow += '<th>Tour Bill Claim</th>';
+                conveyaneChargeTableRow += '</tr></thead>';
+            
 
               for(let i=0 ;i < conveyanceChargeListLength ; i++)
               {
                 var strDate = conveyanceChargelist[i].date__c.toString().split('T')[0];
                 
-                if(i== 0)
-                {
-                  conveyaneChargeTableRow += '<thead>';
-                  conveyaneChargeTableRow += '<tr>';
-                  conveyaneChargeTableRow += '<td colspan="7"  style="background-color:#d3d3d3;padding:5px;"><h5 style="padding-left:5px;">Conveyance Charge Information</h5></td>';    
-                  conveyaneChargeTableRow += '</tr>';
-                  conveyaneChargeTableRow += '<tr><th>Conveyance Charges Name</th>';
-                  conveyaneChargeTableRow += '<th>Amount</th>';
-                  conveyaneChargeTableRow += '<th>Date</th>';
-                  conveyaneChargeTableRow += '<th> Place</th>';
-                  conveyaneChargeTableRow += '<th>Ativity Code</th>';
-                  conveyaneChargeTableRow += '<th>Remarks</th>';
-                  conveyaneChargeTableRow += '<th>Tour Bill Claim</th>';
-                  conveyaneChargeTableRow += '</tr></thead>';
-              }
+               
                 conveyaneChargeTableRow += '<tr>';
                 conveyaneChargeTableRow += '<td>'+conveyanceChargelist[i].name+'</td>';
                 conveyaneChargeTableRow += '<td>'+conveyanceChargelist[i].amount__c+'</td>';
@@ -1409,38 +1409,38 @@ $('.printexp').on('click', function(event){
               console.log('boardinglodginglist '+JSON.stringify(boardinglodginglist));
               var booardingLodgingListLength=boardinglodginglist.length;
               let boardingTableRow = '';
+              
+                  boardingTableRow += '<thead>';
+                  boardingTableRow += '<tr>';
+                  boardingTableRow += '<td colspan="7"  style="background-color:#d3d3d3;padding:5px;"><h5 style="padding-left:5px;">Boarding & Lodging Charge Information</h5></td>';    
+                  boardingTableRow += '</tr>';
+                  boardingTableRow += '<tr><th>Boarding Lodging Number</th>';
+                  boardingTableRow += '<th>Tour Bill Claim</th>';
+                  boardingTableRow += '<th>Stay Option</th>';
+                  boardingTableRow += '<th> Place Journey</th>';
+                  boardingTableRow += '<th>Tier 3 City</th>';
+                  boardingTableRow += '<th>To</th>';
+                  boardingTableRow += '<th>Own Stay Amount</th>';
+                  boardingTableRow += '<th>Number Of Days</th>';
+                  boardingTableRow += '<th>Activity Code</th>';
+                  boardingTableRow += '<th>Daily Allowance</th>';
+                  boardingTableRow += '<th>Amount of B&L as per policy</th>';
+                  boardingTableRow += '<th>From</th></tr>';
+
+                  boardingTableRow += '<tr><th>Amount for boarding and lodging</th>';
+                  boardingTableRow += '<th>Actual Amount for boarding and lodging</th>';
+                  boardingTableRow += '<th>Total Amount</th>';
+                  boardingTableRow += '<th>Extra Amount</th>';
+                  boardingTableRow += '<th>Total Daily Allowance</th>';
+                  boardingTableRow += '</tr></thead>';
+               
 
               for(let i=0 ;i < booardingLodgingListLength ; i++)
               {
                 var strDate = boardinglodginglist[i].from__c.toString().split('T')[0];
                 var strDate1 = boardinglodginglist[i].to__c.toString().split('T')[0];
                 
-                if(i== 0)
-                {
-                    boardingTableRow += '<thead>';
-                    boardingTableRow += '<tr>';
-                    boardingTableRow += '<td colspan="7"  style="background-color:#d3d3d3;padding:5px;"><h5 style="padding-left:5px;">Boarding & Lodging Charge Information</h5></td>';    
-                    boardingTableRow += '</tr>';
-                    boardingTableRow += '<tr><th>Boarding Lodging Number</th>';
-                    boardingTableRow += '<th>Tour Bill Claim</th>';
-                    boardingTableRow += '<th>Stay Option</th>';
-                    boardingTableRow += '<th> Place Journey</th>';
-                    boardingTableRow += '<th>Tier 3 City</th>';
-                    boardingTableRow += '<th>To</th>';
-                    boardingTableRow += '<th>Own Stay Amount</th>';
-                    boardingTableRow += '<th>Number Of Days</th>';
-                    boardingTableRow += '<th>Activity Code</th>';
-                    boardingTableRow += '<th>Daily Allowance</th>';
-                    boardingTableRow += '<th>Amount of B&L as per policy</th>';
-                    boardingTableRow += '<th>From</th></tr>';
-
-                    boardingTableRow += '<tr><th>Amount for boarding and lodging</th>';
-                    boardingTableRow += '<th>Actual Amount for boarding and lodging</th>';
-                    boardingTableRow += '<th>Total Amount</th>';
-                    boardingTableRow += '<th>Extra Amount</th>';
-                    boardingTableRow += '<th>Total Daily Allowance</th>';
-                    boardingTableRow += '</tr></thead>';
-                 }
+            
                     boardingTableRow += '<tr>';
                     boardingTableRow+= '<td>'+boardinglodginglist[i].name+'</td>';
                     boardingTableRow += '<td>'+boardinglodginglist[i].tourname+'</td>';
@@ -1471,26 +1471,25 @@ $('.printexp').on('click', function(event){
               console.log('telfoodlist '+JSON.stringify(telfoodlist));
               var telfoodlistListLength=telfoodlist.length;
               let telefoodTableRow = '';
+              telefoodTableRow += '<thead>';
+                telefoodTableRow += '<tr>';
+                telefoodTableRow += '<td colspan="7"  style="background-color:#d3d3d3;padding:5px;"><h5 style="padding-left:5px;">Telephone & Fooding Information</h5></td>';    
+                telefoodTableRow += '</tr>';
+                telefoodTableRow += '<tr><th>Telephone Fooding & Laundry Expenses Number</th>';
+                telefoodTableRow += '<th>Laundry Expense</th>';
+                telefoodTableRow += '<th>Fooding Expense</th>';
+                telefoodTableRow += '<th> Total Amount</th>';
+                telefoodTableRow += '<th>Activity Code</th>';
+                telefoodTableRow += '<th>Remarks</th>';
+                telefoodTableRow += '<th>Tour Bill Claim</th>';
+                telefoodTableRow += '</tr></thead>';
+        
 
               for(let i=0 ;i < telfoodlistListLength ; i++)
               {
                // var strDate = conveyanceChargelist[i].date__c.toString().split('T')[0];
                 
-                if(i== 0)
-                {
-                      telefoodTableRow += '<thead>';
-                      telefoodTableRow += '<tr>';
-                      telefoodTableRow += '<td colspan="7"  style="background-color:#d3d3d3;padding:5px;"><h5 style="padding-left:5px;">telephone & Fooding Information</h5></td>';    
-                      telefoodTableRow += '</tr>';
-                      telefoodTableRow += '<tr><th>Telephone Fooding & Laundry Expenses Number</th>';
-                      telefoodTableRow += '<th>Laundry Expense</th>';
-                      telefoodTableRow += '<th>Fooding Expense</th>';
-                      telefoodTableRow += '<th> Total Amount</th>';
-                      telefoodTableRow += '<th>Ativity Code</th>';
-                      telefoodTableRow += '<th>Remarks</th>';
-                      telefoodTableRow += '<th>Tour Bill Claim</th>';
-                      telefoodTableRow += '</tr></thead>';
-              }
+
                       telefoodTableRow += '<tr>';
                       telefoodTableRow += '<td>'+telfoodlist[i].name+'</td>';
                       telefoodTableRow += '<td>'+telfoodlist[i].laundry_expense__c+'</td>';
@@ -1510,15 +1509,7 @@ $('.printexp').on('click', function(event){
               console.log('miscelllist '+JSON.stringify(miscelllist));
               var miscellListtLength=miscelllist.length;
               let miscellTableRow = '';
-
-              for(let i=0 ;i < miscellListtLength ; i++)
-              {
-                 var strDate = miscelllist[i].date__c.toString().split('T')[0];
-                
-                if(i== 0)
-                {
-                  
-                        miscellTableRow += '<thead>';
+                miscellTableRow += '<thead>';
                         miscellTableRow += '<tr>';
                         miscellTableRow += '<td colspan="7"  style="background-color:#d3d3d3;padding:5px;"><h5 style="padding-left:5px;"> Miscellaneous Expenses Information</h5></td>';    
                         miscellTableRow += '</tr>';
@@ -1526,11 +1517,15 @@ $('.printexp').on('click', function(event){
                         miscellTableRow += '<th>Date</th>';
                         miscellTableRow += '<th> Amount</th>';
                         miscellTableRow += '<th>Particulars (Mode)</th>';
-                        miscellTableRow += '<th>Ativity Code</th>';
+                        miscellTableRow += '<th>Activity Code</th>';
                         miscellTableRow += '<th>Remarks</th>';
                         miscellTableRow += '<th>Tour Bill Claim</th>';
                         miscellTableRow += '</tr></thead>';
-              }
+
+              for(let i=0 ;i < miscellListtLength ; i++)
+              {
+                 var strDate = miscelllist[i].date__c.toString().split('T')[0];
+                
                 miscellTableRow += '<tr>';
                 miscellTableRow += '<td>'+miscelllist[i].name+'</td>';
                 miscellTableRow += '<td>'+strDate+'</td>';
