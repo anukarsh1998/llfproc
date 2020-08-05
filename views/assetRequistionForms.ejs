@@ -115,7 +115,6 @@
  }
  }*/
  
-
  </style>
 
  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
@@ -125,15 +124,12 @@
  <script>
  $(document).ready(function(){
  $('#assetId').hide();
-
  $("a.assetId").click(function(){
  $('assetId').hide();
  var assetId = $(this).attr('href');
  console.log('assetId : '+assetId);
  document.getElementById('assetId').innerHTML = assetId;
-
  $("#popup").modal("show");
-
  $.ajax({
  type : 'GET',
  url : '/procurement/details',
@@ -154,25 +150,20 @@
  plane.setHours(plane.getHours() + 5);
  plane.setMinutes(plane.getMinutes() + 30);
  let planDt = plane.toLocaleString().split(',')[0];
-
  let rec = new Date(assetDetailsRecord.date_of_receiving_goods__c);
  rec.setHours(rec.getHours() + 5);
  rec.setMinutes(rec.getMinutes() + 30);
  let receiveDate = rec.toLocaleString().split(',')[0];
-
-
-
  let actu = new Date(assetDetailsRecord.requested_closure_actual_date__c);
  actu.setHours(actu.getHours() + 5);
  actu.setMinutes(actu.getMinutes() + 30);
  let actualDt = actu.toLocaleString().split(',')[0];
  console.log('Inside Loop'+actualDt);
-
  assetDetailsTableRows += '<tr>';
  assetDetailsTableRows += '<td><strong>Asset Requisition Name<strong></td>';
  assetDetailsTableRows += '<td>'+assetDetailsRecord.name+'</td>';
  assetDetailsTableRows += '<td><strong>Activity Code<strong></td>';
- assetDetailsTableRows += '<td>'+assetDetailsRecord.activity_code__c+'</td>';
+ assetDetailsTableRows += '<td>'+assetDetailsRecord.actname+'</td>';
  assetDetailsTableRows += '</tr>'; 
  assetDetailsTableRows += '<tr>';
  assetDetailsTableRows += '<td><strong>Requested Closure Plan Date<strong></td>';
@@ -185,19 +176,6 @@
  assetDetailsTableRows += '<td>'+ '<%=objUser.name %>'+'</td>';
  assetDetailsTableRows += '<td><strong>Project/Department<strong></td>';
  assetDetailsTableRows += '<td>'+assetDetailsRecord.projname +'</td>';
- assetDetailsTableRows += '</tr>'; 
- assetDetailsTableRows += '<tr>';
- assetDetailsTableRows += '<td><strong>P.O attachment<strong></td>';
- assetDetailsTableRows += '<td>'+assetDetailsRecord.p_o_attachment__c +'</td>';
- assetDetailsTableRows += '<td><strong>PO Attachment URL<strong></td>';
- if(assetDetailsRecord.po_attachment_url__c!="demo"){
- if(assetDetailsRecord.po_attachment_url__c!=null){
- assetDetailsTableRows += '<td>'+'<a href="'+assetDetailsRecord.po_attachment_url__c+'" target="_blank">Click to View </a></td>';
- }
- }
- else{
- assetDetailsTableRows +='<td></td>';
- }
  assetDetailsTableRows += '</tr>'; 
  
  
@@ -223,7 +201,6 @@
  assetDetailsTableRows += '<td>'+assetDetailsRecord. procurement_head_approval__c+'</td>';
  assetDetailsTableRows += '</tr>';
  assetDetailsTableRows += '<tr>';
-
  assetDetailsTableRows += '<tr>';
  assetDetailsTableRows += '<td><strong>Procurement Comt. Approval for fortnight<strong></td>';
  assetDetailsTableRows += '<td>'+assetDetailsRecord.procurement_comt_approval_for_fortnight__c+'</td>';
@@ -245,29 +222,42 @@
  assetDetailsTableRows += '<td>'+assetDetailsRecord.management_approval_activity_code__c+'</td>';
  assetDetailsTableRows += '</tr>';
  assetDetailsTableRows += '<tr>';
-
-
  assetDetailsTableRows += '<tr>';
  assetDetailsTableRows += '<td><strong>Procurement Committee Approval<strong></td>';
  assetDetailsTableRows += '<td>'+assetDetailsRecord.procurement_committee_approval__c+'</td>';
  
  assetDetailsTableRows += '</tr>';
-
  
  assetDetailsTableRows += '<tr>';
  assetDetailsTableRows += '<td colspan="4" style="background-color:#d3d3d3;"><h5>Account Status</h5></td>'; 
  assetDetailsTableRows += '</tr>';
-
  assetDetailsTableRows += '<tr>';
  assetDetailsTableRows += '<td><strong> Accounts Approval<strong></td>';
- assetDetailsTableRows += '<td>'+assetDetailsRecord.management_approval_less_than_3_quotes__c+'</td>';
- assetDetailsTableRows += '<td><strong>Payment Status<strong></td>';
- assetDetailsTableRows += '<td>'+assetDetailsRecord.management_approval_activity_code__c+'</td>';
+ assetDetailsTableRows += '<td>'+assetDetailsRecord.accounts_approval__c+'</td>';
+ assetDetailsTableRows += '<td><strong>UTR Number/Transaction Details<strong></td>';
+ assetDetailsTableRows += '<td>'+assetDetailsRecord.utr_number_transaction_details__c+'</td>';
  assetDetailsTableRows += '</tr>';
  assetDetailsTableRows += '<tr>';
-
-
-
+ assetDetailsTableRows += '<tr>';
+ assetDetailsTableRows += '<td><strong>Advance Payment Status<strong></td>';
+ assetDetailsTableRows += '<td>'+assetDetailsRecord.advance_payment_status__c+'</td>';
+ assetDetailsTableRows += '<td><strong>Final Payment Status<strong></td>';
+ assetDetailsTableRows += '<td>'+assetDetailsRecord.payment_status__c+'</td>';
+ assetDetailsTableRows += '</tr>';
+ assetDetailsTableRows += '<tr>';
+    assetDetailsTableRows += '<tr>';
+ assetDetailsTableRows += '<td><strong>P.O attachment<strong></td>';
+ assetDetailsTableRows += '<td>'+assetDetailsRecord.p_o_attachment__c +'</td>';
+ assetDetailsTableRows += '<td><strong>PO Attachment URL<strong></td>';
+ if(assetDetailsRecord.po_attachment_url__c!="demo"){
+ if(assetDetailsRecord.po_attachment_url__c!=null){
+ assetDetailsTableRows += '<td>'+'<a href="'+assetDetailsRecord.po_attachment_url__c+'" target="_blank">Click to View </a></td>';
+ }
+ }
+ else{
+ assetDetailsTableRows +='<td></td>';
+ }
+ assetDetailsTableRows += '</tr>'; 
  assetDetailsTableRows += '<tr>';
  assetDetailsTableRows += '<td colspan="4" style="background-color:#d3d3d3;"><h5>Amount Information</h5></td>'; 
  assetDetailsTableRows += '</tr>';
@@ -285,15 +275,34 @@
  assetDetailsTableRows += '<td><strong><strong></td>';
  assetDetailsTableRows += '<td></td>';
  assetDetailsTableRows += '</tr>'; 
-
+ assetDetailsTableRows += '<tr>';
+ assetDetailsTableRows += '<td colspan="4" style="background-color:#d3d3d3;"><h5>Purchase Order Checklist</h5></td>'; 
+ assetDetailsTableRows += '</tr>';
+ assetDetailsTableRows += '<tr>';
+ assetDetailsTableRows += '<td><strong>if < 3 quotations, specify Reason<strong></td>';
+ assetDetailsTableRows += '<td>'+assetDetailsRecord.if_3_quotations_specify_reason__c+'</td>';
+ assetDetailsTableRows += '<td><strong>reason for non-registered GST Vendor<strong></td>';
+ assetDetailsTableRows += '<td>'+assetDetailsRecord.reason_for_non_registered_gst_vendor__c+'</td>';
+ assetDetailsTableRows += '</tr>'; 
+ assetDetailsTableRows += '<tr>';
+ assetDetailsTableRows += '<td><strong>Pricing Terms/Cost comparison<strong></td>';
+ assetDetailsTableRows += '<td>'+assetDetailsRecord.pricing_terms_cost_comparison__c+'</td>';
+ assetDetailsTableRows += '<td><strong>Delivery Terms: Delivery Place<strong></td>';
+ assetDetailsTableRows += '<td>'+assetDetailsRecord.delivery_terms_delivery_place__c+'</td>';
+ assetDetailsTableRows += '</tr>'; 
+ assetDetailsTableRows += '<tr>';
+ assetDetailsTableRows += '<td><strong>Delivery Terms: Delivery Time<strong></td>';
+ assetDetailsTableRows += '<td>'+assetDetailsRecord.delivery_terms_delivery_time__c.slice(0, 10)+'</td>';
+ assetDetailsTableRows += '<td><strong>Delivery cost Incl. / Excl. of Transport<strong></td>';
+ assetDetailsTableRows += '<td>'+assetDetailsRecord.delivery_cost_incl__c+'</td>';
+ assetDetailsTableRows += '</tr>'; 
  assetDetailsTableRows += '<tr>';
  assetDetailsTableRows += '<td colspan="4" style="background-color:#d3d3d3;"><h5>Received Stage</h5></td>'; 
  assetDetailsTableRows += '</tr>';
-
  assetDetailsTableRows += '<tr>';
  assetDetailsTableRows += '<td><strong>Status<strong></td>';
  assetDetailsTableRows += '<td>'+assetDetailsRecord.status__c+'</td>';
- assetDetailsTableRows += '<td><strong>Payment Received Acknowledgement<strong></td>';
+ assetDetailsTableRows += '<td><strong>Goods/Service Received<strong></td>';
  assetDetailsTableRows += '<td>'+assetDetailsRecord.payment_received_acknowledgement__c+'</td>';
  assetDetailsTableRows += '</tr>'; 
  
@@ -310,14 +319,10 @@
  assetDetailsTableRows += '<td><strong><strong></td>';
  assetDetailsTableRows += '<td></td>';
  assetDetailsTableRows += '</tr>';
-
-
-
  })
  $('#assetDetails').html(assetDetailsTableRows);
+ 
  }
-
-
  if(assetDetails.nonItProducts.length > 0)
  {
  let nonItProductTable = '';
@@ -327,15 +332,12 @@
  nonItProductTable += '<td>'+eachNonIt.items__c +'</td>';
  nonItProductTable += '<td>'+eachNonIt.quantity__c +'</td>';
  nonItProductTable += '<td>'+eachNonIt.budget__c +'</td></tr>'; 
-
  })
  
  nonItProductTable+= '<td colspan="6"><center><a target="_blank" href="/procurement/getNonItProcurementListVIew/'+assetId+'">ViewlAll</a></centre></td>';
  $('#procuremnetNonItTable').empty();
  $('#procuremnetNonItTable').append(nonItProductTable);
  }
-
-
  if(assetDetails.itProducts.length > 0)
  {
  let itProductTable = '';
@@ -351,8 +353,6 @@
  $('#procuremnetItTable').empty();
  $('#procuremnetItTable').append(itProductTable); 
  }
-
-
  if(assetDetails.approvals.length > 0)
  {
  let approvalHtml = '';
@@ -364,7 +364,6 @@
  approvalHtml += '<td>'+eachApproval.approver_s_emails__c +'</td></tr>'; 
  })
  approvalHtml+= '<td colspan="6"><center><a target="_blank" href="/approvals/getApprovalListView/'+assetId+'">View All</a></centre></td>';
-
  $('#approvalTable').empty();
  $('#approvalTable').append(approvalHtml); 
  }
@@ -374,7 +373,6 @@
  })
  
  });
-
  $.ajax({
  url: '/procurement/getProjectList',
  type:'get',
@@ -398,9 +396,6 @@
  console.log('jqXHR '+JSON.stringify(jqXHR));
  console.log('error '+err);
  })
-
-
-
  $('#createAssetRequisitionFormButton').click(function() {
  $('#createAssetRequisitionForm').modal('show');
  $('#assetRequisitionSubmitbutton').on('click',function(event){
@@ -410,7 +405,6 @@
  event.stopImmediatePropagation();
  // alert('Save Button Clicked !');
  var $inputs = $('#assetRequisitionForm :input');
-
  // not sure if you wanted this, but I thought I'd add it.
  // get an associative array of just the values.
  var values = {};
@@ -439,12 +433,9 @@
  $('#errorMessages').empty();
  $('#errorMessages').append(errorHtml); 
  }) 
-
  })
  })
-
  
-
  });
  </script>
 
@@ -882,27 +873,110 @@
 
  <div class="form-group">
  <div class="row">
- <div class="col-md-6">
- <label for="activityCode">Activity Code</label>
- <input type="text" class="form-control" id="activityCode" value="" name="activityCode" >
- </div>
- <div class="col-md-6">
- <label for="paymentStatus"></label>Payment Status</label>
- <!-- <input type="text" class="form-control" id="paymentStatus" value="" name="paymentStatus" > -->
- <select id="paymentStatus" class="custom-select custom-select-sm form-control" readonly name="paymentStatus">
- <option value="">--None--</option>
- <option value="Released">Released</option>
- <option value="Rejected">Rejected</option>
- </select>
- </div>
+
+  <div class="col-md-6">
+    <label for="activityCode">Activity Code</label>
+    <select id="activityCode" class="custom-select custom-select-sm form-control" name="activityCode">
+   <!--  <option value="">--None--</option> -->
+    </select> 
+    </div>
  
+
+ <div class="col-md-6">
+   <label for="attachment">P.O. Attachment</label>
+   <select id="attachment" class="custom-select custom-select-sm form-control" name="attachment">
+   <option value="">--None--</option>
+   <option value="No">No</option>
+   <option value="Yes">Yes</option>
+   <option value="Not Required	">Not Required</option>
+   </select> 
+   </div>
  </div>
  </div>
 
  <div class="form-group">
+    <div class="row">  
+    <div class="col-md-6">
+      <label for="paymentStatus">Final payment Status</label>
+      <select id="paymentStatus" class="custom-select custom-select-sm form-control" name="paymentStatus" readonly="true">
+      <option value="null">None</option>
+      <option value="Released">Released</option>
+      <option value="Rejected">Not Released</option>
+      </select> 
+      </div>
+    </div>
+    </div>
+
+ <div class="form-group">
+    <div class="row">
+    <div class="col-md-12">
+    <label for="" ><h5 style="background-color:#d3d3d3";>Purchase Order Checklist</h5></label>
+    </div>
+    </div>
+    </div>
+    
+   
+    <div class="form-group">
+    <div class="row">
+    <div class="col-md-6">
+    <label for="quotations">if less than 3 quotations, specify Reason</label>
+    <select id="quotations" class="custom-select custom-select-sm form-control" name="quotations" >
+        <option value="true">True</option>
+        <option value="false">False</option>
+        </select> 
+    </div>
+    
+    <div class="col-md-6">
+    <label for="reason">reason for non-registered GST Vendor</label>
+    <select id="reason" class="custom-select custom-select-sm form-control" name="reason" >
+        <option value="true">True</option>
+        <option value="false">False</option>
+        </select> 
+   </div>
+    </div> 
+    </div>
+   
+    <div class="form-group">
+    <div class="row">
+    <div class="col-md-6">
+    <label for="pricing">Pricing Terms/Cost comparison</label>
+    <!-- <input type="checkbox"  id="pricing" value="" name="pricing" > -->
+    <select id="pricing" class="custom-select custom-select-sm form-control" name="pricing" >
+        <option value="true">True</option>
+        <option value="false">False</option>
+        </select> 
+    </div>
+    
+    <div class="col-md-6">
+    <label for="deliveryPlace">Delivery Terms: Delivery Place</label>
+    <input type="text" class="form-control" id="deliveryPlace" value="" name="deliveryPlace" >
+    </div>
+    </div> 
+    </div>
+   
+    <div class="form-group">
+    <div class="row">
+    <div class="col-md-6">
+    <label for="deliveryTime">Delivery Terms: Delivery Time</label>
+    <input type="date" class="form-control" id="deliveryTime" value="" name="deliveryTime" >
+    </div>
+    
+    <div class="col-md-6">
+        <label for="deliveryCost">Delivery cost Incl. / Excl. of Transport</label>
+        <input type="text" class="form-control" id="deliveryCost" value="" name="deliveryCost" >
+      </div>
+
+    <div class="col-md-6">
+    <input type="hidden" class="form-control" id="assetsfid" value="" name="assetsfid" >
+    
+    </div>
+    </div> 
+    </div>
+   
+ <div class="form-group">
  <div class="row">
  <div class="col-md-12">
- <label for="" ><h5 style="background-color:#d3d3d3";>Received Stage(to be Filled By Raiser)</h5></label>
+ <label for="" colspan="6"><h5 style="background-color:#d3d3d3";>Received Stage(to be Filled By Raiser)</h5></label>
  </div>
  </div>
  </div>
@@ -913,16 +987,16 @@
  <div class="col-md-6">
  <label for="status">Status</label>
  <select id="status" class="custom-select custom-select-sm form-control" name="status">
- <option value="">--None--</option>
+ <option value="null">--None--</option>
  <option value="Open">Open</option>
  <option value="Closed">Closed</option>
  </select>
  </div>
 
  <div class="col-md-6">
- <label for="amount">Payment Received Acknowledgement</label>
+ <label for="amount">Goods/Service Received</label>
  <select id="payement" class="custom-select custom-select-sm form-control" name="payement">
- <option value="">--None--</option>
+ <option value="null">--None--</option>
  <option value="Received">Received</option>
  <option value="Not Received">Not Received</option>
  </select> 
@@ -1008,146 +1082,189 @@
 </div>
 <script>
  $(document).ready(() => {
-
  $('assetId').hide();
-
  
-
  $('a.procurementNonIT').click(() => {
  console.log('procurementNonIT anchor tag ');
  var assetId = document.getElementById('assetId').innerHTML;
  console.log('assetId : '+assetId);
  location.assign('/procurement/nonItProducts/'+assetId);
  });
-
  $('a.procurementIT').click(() => {
  console.log('procurementIT anchor tag ');
  var assetId = document.getElementById('assetId').innerHTML;
  console.log('assetId : '+assetId);
  location.assign('/procurement/itProducts/'+assetId);
-
  });
-
-
  $('a.notes').on('click',function(event){
  //alert('Hello'+this.id);
  var assetId = document.getElementById('assetId').innerHTML;
  console.log('assetId notes : '+assetId);
  location.assign('/procurement/upload/'+assetId);
-
  })
-
-
  $('.approvalCommentModalButton').on('click',function(event){
  //alert('Hello'+this.id);
  event.stopImmediatePropagation();
  event.stopPropagation();
  let assetRequisitionFormId = this.id;
  $('#approvalCommentModal').modal('show');
-
  $('#submitForApproval').on('click', function(e){
  e.stopImmediatePropagation();
  e.stopPropagation();
  let comment = document.getElementById('commentTextarea').value;
  alert('comment : '+comment);
-
  $.post('/procurement/sendProcurementApproval',{assetRequisitionFormId:assetRequisitionFormId, comment: comment }, function(response){
-
  alert(response);
  $('#approvalCommentModal').modal('hide');
-
  }).fail(function(jqXHR, status, error){
  
  //$('#approvalCommentModal').modal('hide');
  })
-
  });
  });
-
  $('.approvalAccountsCommentModalButton').on('click',function(event){
  event.stopImmediatePropagation();
  event.stopPropagation();
-
  let assetRequisitionFormId = this.id;
  $('#approvalCommentModal').modal('show');
-
  $('#submitForApproval').on('click', function(e){
  e.stopImmediatePropagation();
  e.stopPropagation();
-
  let comment = document.getElementById('commentTextarea').value;
  alert('comment : '+comment);
-
  $.post('/procurement/sendProcurementAccountsApproval',{assetRequisitionFormId:assetRequisitionFormId, comment: comment }, function(response){
-
  alert(response);
  $('#approvalCommentModal').modal('hide');
-
- }).fail(function(jqXHR, status, error){
- 
+ })
+ .fail(function(jqXHR, status, error){
  //$('#approvalCommentModal').modal('hide');
  })
-
  });
  });
-
  //assetRequisitionEditModal
-
  $('.assetRequisitionEditModalButton').on('click', function(event){
-
+     event.stopImmediatePropagation();
+     event.stopPropagation();
  let assetId = this.id;
  console.log('Before Show Edit Modal ');
  $('#assetRequisitionEditModal').modal('show');
  console.log('After Show Edit Modal ');
-
+ /*let lstActivityCodes = [];
+ $.ajax({
+      url : '/procurement/fetchActivityCode',
+      data : {
+         assetId : assetId
+      },
+      dataType : 'json',
+      type : 'get'
+  })
+  .done((response) => {
+      console.log('response  '+JSON.stringify(response));
+      if(response.length > 0)
+      { 
+       
+      }
+  })
+  .fail((jqXHR,text,err) => {
+      console.log('text  '+text + '  err '+err);
+  })
+*/
  $.get("/procurement/assetEditDetails",{assetId : assetId},
  function(assetDetailsRecord){
-
- console.log('Edit assetDetails : '+JSON.stringify(assetDetailsRecord));
+ //console.log('Edit assetDetails : '+JSON.stringify(assetDetailsRecord));
+ let assetRecord = assetDetailsRecord.asset[0];
+  
+ //let activityCodes = assetDetailsRecord.activity[0];
+ let activityCodes = [];
+ for(let i=0; i< assetDetailsRecord.activity.length ;i++)
+      {
+        activityCodes.push(assetDetailsRecord.activity[i]);
+      }
+ console.log('Asset Details list'+JSON.stringify(assetRecord));
+ console.log('Activity Codes'+JSON.stringify(activityCodes));
  let strReceivingGoodsDate=''; 
  let strclousreActualDate='';
  let clousrePlanDate =''; 
- let clousreActualDate = new Date(assetDetailsRecord.requested_closure_actual_date__c);
+ let clousreActualDate = new Date(assetRecord.requested_closure_actual_date__c);
  console.log('clousreActualDate '+clousreActualDate);
- if(assetDetailsRecord.requested_closure_actual_date__c!=null){
- strclousreActualDate = assetDetailsRecord.requested_closure_actual_date__c.split('T')[0];
+ if(assetRecord.requested_closure_actual_date__c!=null){
+ strclousreActualDate = assetRecord.requested_closure_actual_date__c.split('T')[0];
  }
-
  
  // console.log('strclousreActualDate : '+strclousreActualDate);
- if(assetDetailsRecord.requested_closure_plan_date__c!=null)
+ if(assetRecord.requested_closure_plan_date__c!=null)
  {
- clousrePlanDate = assetDetailsRecord.requested_closure_plan_date__c.split('T')[0];
+ clousrePlanDate = assetRecord.requested_closure_plan_date__c.split('T')[0];
  }
- if(assetDetailsRecord.date_of_receiving_goods__c!=null){
- strReceivingGoodsDate = assetDetailsRecord.date_of_receiving_goods__c.split('T')[0];
+ if(assetRecord.date_of_receiving_goods__c!=null){
+ strReceivingGoodsDate = assetRecord.date_of_receiving_goods__c.split('T')[0];
  console.log('strReceivingGoodsDate : '+strReceivingGoodsDate +' :clousrePlanDate '+ clousrePlanDate);
  }
- 
- 
 
- document.forms["editAssetForm"]["assetName"].value = assetDetailsRecord.name;
- 
+      for(let i=0; i< activityCodes.length ;i++)
+      {
+        $('#activityCode')
+        .append($("<option></option>")
+        .attr("value",activityCodes[i].sfid)
+        .text(activityCodes[i].name));	
+      }
+    /*   $('#activityCode').on('change',function(){
+          let taskId = this.value;
+          let selectedCode = activityCodes.filter((eachCode)=> {
+            if(eachCode.sfid == taskId)
+              return eachCode;
+          })
+          let label = selectedCode[0].name;
+          document.getElementById('projectTask').value = label;
+        //  $('#projectTask'+cnt).value = label;
+          console.log('label  :'+label+' value : '+taskId);
+      }) -->
+      */
+      
+ document.forms["editAssetForm"]["assetName"].value = assetRecord.name;
  document.forms["editAssetForm"]["closureActualDate"].value = strclousreActualDate;
  document.forms["editAssetForm"]["closurePlanDate"].value =clousrePlanDate;
- document.forms["editAssetForm"]["projectName"].value = assetDetailsRecord.projname;
- document.forms["editAssetForm"]["activityCode"].value = assetDetailsRecord.activity_code__c;
- document.forms["editAssetForm"]["status"].value = assetDetailsRecord.status__c; 
- document.forms["editAssetForm"]["payement"].value = assetDetailsRecord.payment_received_acknowledgement__c;
- document.forms["editAssetForm"]["paymentStatus"].value = assetDetailsRecord.payment_status__c;
- document.forms["editAssetForm"]["receiverName"].value = assetDetailsRecord.receiver_name__c;
- document.forms["editAssetForm"]["receivedQuantity"].value = assetDetailsRecord.received_quantity_goods__c;
+ document.forms["editAssetForm"]["projectName"].value = assetRecord.projname;
+ document.forms["editAssetForm"]["activityCode"].value = assetRecord.activity_code_project__c;
+ document.forms["editAssetForm"]["attachment"].value = assetRecord.p_o_attachment__c; 
+ document.forms["editAssetForm"]["status"].value = assetRecord.status__c; 
+ document.forms["editAssetForm"]["payement"].value = assetRecord.payment_received_acknowledgement__c;
+ 
+ document.forms["editAssetForm"]["paymentStatus"].value = assetRecord.payment_status__c;
+
+ document.forms["editAssetForm"]["receiverName"].value = assetRecord.receiver_name__c;
+ 
+ document.forms["editAssetForm"]["receivedQuantity"].value = assetRecord.received_quantity_goods__c;
+ 
  document.forms["editAssetForm"]["goodsDate"].value = strReceivingGoodsDate;
- document.forms["editAssetForm"]["assetid"].value = assetDetailsRecord.sfid;
+ document.forms["editAssetForm"]["assetsfid"].value = assetRecord.sfid;
+
+ document.forms["editAssetForm"]["quotations"].value = assetRecord.if_3_quotations_specify_reason__c;
+ document.forms["editAssetForm"]["reason"].value = assetRecord.reason_for_non_registered_gst_vendor__c;
+ document.forms["editAssetForm"]["pricing"].value = assetRecord.pricing_terms_cost_comparison__c;
+ document.forms["editAssetForm"]["deliveryPlace"].value = assetRecord.delivery_terms_delivery_place__c;
  
- 
+console.log('aman');
+if(assetRecord.delivery_terms_delivery_time__c!=null){
+    document.forms["editAssetForm"]["deliveryTime"].value = assetRecord.delivery_terms_delivery_time__c.split('T')[0];
+    console.log('aman');
+}
+ document.forms["editAssetForm"]["deliveryCost"].value = assetRecord.delivery_cost_incl__c;
+ document.forms["editAssetForm"]["quotations"].value = assetRecord.if_3_quotations_specify_reason__c;
+ document.forms["editAssetForm"]["reason"].value = assetRecord.reason_for_non_registered_gst_vendor__c;
+ document.forms["editAssetForm"]["pricing"].value = assetRecord.pricing_terms_cost_comparison__c;
+
+ /*
+  console.log('checkedchecked'+JSON.stringify($('#quotations').val));
+ $('#quotations').prop('checked', assetRecord.if_3_quotations_specify_reason__c);
+ $('#reason').prop('checked', assetRecord.reason_for_non_registered_gst_vendor__c);
+ $('#pricing').prop('checked', assetRecord.pricing_terms_cost_comparison__c);
+ */
  }).fail(function(jqXHR, status, error){
  console.log('jqXHR : '+JSON.stringify(jqXHR));
  console.log('textStatus : '+textStatus);
  })
  });
-
-
  /* Clearing the fields when a modal is closed */
  $('[data-dismiss=modal]').on('click', function (e) {
  var $t = $(this),
@@ -1160,7 +1277,6 @@
  .prop("checked", "")
  .end();
  })
-
  $('.modal').on('hidden.bs.modal', function (e) {
  $(this)
  .find("input,textarea,select")
@@ -1170,19 +1286,16 @@
  .prop("checked", "")
  .end();
  })
-
-
  });
  $('#editassetForm').on('click',function(event){
  event.preventDefault();
  event.stopPropagation();
  event.stopImmediatePropagation();
- var assetId = document.getElementById('assetId').value;
- console.log('assetId : '+assetId);
+ //var assetId = document.getElementById('assetId').value;
+// console.log('assetId : '+assetId);
  
  alert('Save Button Clicked !' );
  var $inputs = $('#editAssetForm :input');
-
  // not sure if you wanted this, but I thought I'd add it.
  // get an associative array of just the values.
  var values = {};
@@ -1203,8 +1316,8 @@
  })
  .fail((jqXHR, status, error) => {
  console.log('jqXHR '+JSON.stringify(jqXHR));
- if(jqXHR.responseText=='succesfully inserted'){
- alert('data succesfully updated ');
+ if(jqXHR.responseText=='succesfully Update!'){
+ alert('succesfully Update!');
  $('#assetRequisitionEditModal').modal('hide');
  }
  else{
@@ -1214,11 +1327,8 @@
  }) 
  
  
-
  }) 
  
-
-
  function formatDate(date) {
  var d = new Date(date),
  month = '' + (d.getMonth() + 1),
@@ -1232,9 +1342,4 @@
  
  return [year, month ,day].join('-');
  }
-
-
-
 </script>
-
-

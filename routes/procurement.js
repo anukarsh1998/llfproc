@@ -37,27 +37,72 @@ router.get('/assetEditDetails',(request, response) =>{
     let assetId = request.query.assetId;
     console.log('assetId  '+assetId);
 
-    let qyr='SELECT asset.id, asset.sfid as sfid,asset.name as name ,asset.Activity_Code__c, asset.GST__c,asset.Requested_Closure_Plan_Date__c,asset.Requested_Closure_Actual_Date__c,asset.Project_Department__c, '+
+    let qyr='SELECT asset.id, asset.sfid as sfid,asset.name as name ,asset.Activity_Code_Project__c, asset.GST__c,asset.Requested_Closure_Plan_Date__c,asset.Requested_Closure_Actual_Date__c,asset.Project_Department__c, '+
     'asset.Manager_Approval__c,asset.Management_Approval__c,asset.Procurement_Committee_Approval__c,asset.Chairperson_Approval__c,asset.Committee_Approved_Counts__c,'+
     'asset.Comittee_Rejected_Count__c,asset.Procurement_Committee_Status__c,asset.Accounts_Approval__c,asset.Procurement_Head_Approval__c,asset.Approval_Status__c,'+
     'asset.Number_Of_IT_Product__c,asset.Number_Of_Non_IT_Product__c,asset.Procurement_IT_total_amount__c,asset.Procurement_Non_IT_total_amount__c, asset.Total_amount__c,proj.name as projname,proj.sfid as profsfid, '+
-    'asset.Management_Approval_Activity_Code__c,asset.Management_Approval_for_fortnight_limit__c, '+
+    'asset.Management_Approval_Activity_Code__c,asset.Management_Approval_for_fortnight_limit__c,asset.P_O_attachment__c, '+
     'asset.Management_Approval_less_than_3_quotes__c,asset.Procurement_Comt_Approval_for_fortnight__c, '+
-     'asset.P_O_attachment__c,po_attachment_url__c,payment_status__c,asset.status__c,asset.payment_received_acknowledgement__c,asset.receiver_name__c,asset.received_quantity_goods__c,asset.date_of_receiving_goods__c '+
+     'asset.P_O_attachment__c,po_attachment_url__c,payment_status__c,asset.status__c,asset.payment_received_acknowledgement__c,asset.receiver_name__c,asset.received_quantity_goods__c,asset.date_of_receiving_goods__c, '+
+     'asset.if_3_quotations_specify_Reason__c,asset.reason_for_non_registered_GST_Vendor__c, asset.Pricing_Terms_Cost_comparison__c, asset.Delivery_Terms_Delivery_Place__c, asset.Delivery_Terms_Delivery_Time__c,asset.Delivery_cost_Incl__c '+
     'FROM  salesforce.Asset_Requisition_Form__c asset '+
      'INNER JOIN salesforce.Milestone1_Project__c proj '+
      'ON asset.Project_Department__c =  proj.sfid '+
       'WHERE asset.sfid = $1';
 
       console.log('qry '+qyr);
-      
+      let popupDetails = [];
+      var objData =  {};
        pool
        .query(qyr,[assetId])
        .then((assetQueryResult)=> {
            if(assetQueryResult.rowCount > 0)
            {
                console.log('assetQueryResult EDIT '+JSON.stringify(assetQueryResult.rows));
-               response.send(assetQueryResult.rows[0]);
+               //response.send(assetQueryResult.rows[0]);
+               //popupDetails.push(assetQueryResult.rows[0]);
+               //details.push(popupDetails);
+               objData.asset = assetQueryResult.rows;
+               console.log('hello i am inside Procurement Activity Code');
+                 let projectId ;
+               let activity ;
+                               pool
+                               .query('SELECT sfid, Project_Department__c FROM salesforce.Asset_Requisition_Form__c WHERE  sfid = $1',[assetId])
+                               .then((ProcurementQueryResult) => {
+                                 console.log('ProcurementQueryResult :' +JSON.stringify(ProcurementQueryResult.rows));
+                                 if(ProcurementQueryResult.rowCount > 0)
+                                 {
+                                    activity = ProcurementQueryResult.rows[0] ;
+                                   projectId = activity.project_department__c;
+                                   console.log('Inside Procurement query  : '+projectId);
+                                   pool
+                                   .query('Select sfid , Name FROM salesforce.Activity_Code__c where Project__c = $1', [projectId])
+                                   .then((activityCodeQueryResult) => {
+                                     console.log('activityCodeQueryResult  : '+JSON.stringify(activityCodeQueryResult.rows));
+                                     let numberOfRows, lstActivityCode =[];
+                                     if(activityCodeQueryResult.rowCount > 0)
+                                     {
+                                       numberOfRows = activityCodeQueryResult.rows.length;
+                                       for(let i=0; i< numberOfRows ; i++)
+                                       {
+                                         lstActivityCode.push(activityCodeQueryResult.rows[i]);
+                                       }
+                                       objData.activity = lstActivityCode;
+                                     //  details.push(lstActivityCode);
+                                       response.send(objData);
+                                     }
+                                   })
+                                   .catch((activityCodeQueryError) => {
+                                     console.log('activityCodeQueryError  : '+activityCodeQueryError.stack);
+                                     response.send([]);
+                                   })
+                                 }
+                               })
+                               .catch((expenseQueryError) =>
+                                   {
+                                 console.log('expenseQueryError  : '+expenseQueryError.stack);
+                                  })
+           
            }
            else
            {
@@ -71,6 +116,51 @@ router.get('/assetEditDetails',(request, response) =>{
 
 });
 
+router.get('/fetchActivityCode', verify ,(request, response) => {
+
+    console.log('hello i am inside Procurement Activity Code');
+  
+    let assetId = request.query.assetId;
+    console.log('assetId :' +assetId)
+    let projectId ;
+    let activity ;
+                    pool
+                    .query('SELECT sfid, Project_Department__c FROM salesforce.Asset_Requisition_Form__c WHERE  sfid = $1',[assetId])
+                    .then((ProcurementQueryResult) => {
+                      console.log('ProcurementQueryResult :' +JSON.stringify(ProcurementQueryResult.rows));
+                      if(ProcurementQueryResult.rowCount > 0)
+                      {
+                         activity = ProcurementQueryResult.rows[0] ;
+                        projectId = activity.project_department__c;
+                        console.log('Inside Procurement query  : '+projectId);
+                        pool
+                        .query('Select sfid , Name FROM salesforce.Activity_Code__c where Project__c = $1', [projectId])
+                        .then((activityCodeQueryResult) => {
+                          console.log('activityCodeQueryResult  : '+JSON.stringify(activityCodeQueryResult.rows));
+                          let numberOfRows, lstActivityCode =[];
+                          if(activityCodeQueryResult.rowCount > 0)
+                          {
+                            numberOfRows = activityCodeQueryResult.rows.length;
+                            for(let i=0; i< numberOfRows ; i++)
+                            {
+                              lstActivityCode.push(activityCodeQueryResult.rows[i]);
+                            }
+                            response.send(lstActivityCode);
+                          }
+                        })
+                        .catch((activityCodeQueryError) => {
+                          console.log('activityCodeQueryError  : '+activityCodeQueryError.stack);
+                          response.send([]);
+                        })
+                      }
+                    })
+                    .catch((expenseQueryError) =>
+                        {
+                      console.log('expenseQueryError  : '+expenseQueryError.stack);
+                       })
+                  })
+    
+
 router.get('/details',verify, async(request, response) => {
 
     var assetId = request.query.assetId;
@@ -78,16 +168,19 @@ router.get('/details',verify, async(request, response) => {
 
     var assetFormAndRelatedRecords = {};
     
- let qyr='SELECT asset.id, asset.sfid,asset.name as name ,asset.Activity_Code__c, asset.GST__c,asset.Requested_Closure_Plan_Date__c,asset.Requested_Closure_Actual_Date__c,asset.Project_Department__c, '+
+ let qyr='SELECT asset.id, asset.sfid,asset.name as name ,act.name as actname, asset.GST__c,asset.Requested_Closure_Plan_Date__c,asset.Requested_Closure_Actual_Date__c,asset.Project_Department__c, '+
  'asset.Manager_Approval__c,asset.Management_Approval__c,asset.Procurement_Committee_Approval__c,asset.Chairperson_Approval__c,asset.Committee_Approved_Counts__c,'+
  'asset.Comittee_Rejected_Count__c,asset.Procurement_Committee_Status__c,asset.Accounts_Approval__c,asset.Procurement_Head_Approval__c,asset.Approval_Status__c,'+
  'asset.Number_Of_IT_Product__c,asset.Number_Of_Non_IT_Product__c,asset.Procurement_IT_total_amount__c,asset.Procurement_Non_IT_total_amount__c, asset.Total_amount__c,proj.name as projname,proj.sfid, '+
  'asset.Management_Approval_Activity_Code__c,asset.Management_Approval_for_fortnight_limit__c, '+
  'asset.Management_Approval_less_than_3_quotes__c,asset.Procurement_Comt_Approval_for_fortnight__c, '+
-  'asset.P_O_attachment__c,po_attachment_url__c,asset.payment_status__c,asset.Status__c,asset.Payment_Received_Acknowledgement__c,asset.receiver_name__c,asset.received_quantity_goods__c,asset.date_of_receiving_goods__c '+
+  'asset.P_O_attachment__c,po_attachment_url__c,asset.advance_payment_status__c,asset.payment_status__c,asset.Status__c,asset.Payment_Received_Acknowledgement__c,asset.receiver_name__c,asset.received_quantity_goods__c,asset.date_of_receiving_goods__c, '+
+  'asset.utr_number_transaction_details__c, asset.advance_payment_status__c, '+
+  'asset.if_3_quotations_specify_Reason__c,asset.reason_for_non_registered_GST_Vendor__c, asset.Pricing_Terms_Cost_comparison__c, asset.Delivery_Terms_Delivery_Place__c, asset.Delivery_Terms_Delivery_Time__c,asset.Delivery_cost_Incl__c '+
  'FROM  salesforce.Asset_Requisition_Form__c asset '+
   'INNER JOIN salesforce.Milestone1_Project__c proj '+
   'ON asset.Project_Department__c =  proj.sfid '+
+  'INNER JOIN salesforce.Activity_Code__c act ON asset.Activity_Code_Project__c = act.sfid '+
    'WHERE asset.sfid = $1';
    console.log('qry '+qyr);
     await
@@ -101,6 +194,7 @@ router.get('/details',verify, async(request, response) => {
         }
         else
         {
+            console.log('from activity code error'+JSON.stringify(assetQueryResult));
             assetFormAndRelatedRecords.assetFormDetails = [];
         }
     })
@@ -227,8 +321,8 @@ router.post('/updateasset',(request,response)=>{
     let closurePlanDate =request.body.closurePlanDate;
     let goodsDate=request.body.goodsDate;
     console.log('body  : '+JSON.stringify(body));
-    const { assetName,activityCode,paymentStatus,status,payement,receiverName,receivedQuantity,assetid} = request.body;
-    console.log('assetName    '+assetName);
+    const {assetsfid, assetName,activityCode,paymentStatus,status,payement,receiverName,receivedQuantity,quotations,reason,pricing,deliveryPlace,deliveryTime,deliveryCost,attachment} = request.body;
+    console.log('assetsfid    '+assetsfid);
     console.log('closureActualDate  '+closureActualDate);
     console.log('closurePlanDate  '+closurePlanDate);
     console.log('activityCode  '+activityCode);
@@ -238,7 +332,16 @@ router.post('/updateasset',(request,response)=>{
     console.log('receiverName  '+receiverName);
     console.log('receivedQuantity  '+receivedQuantity);
     console.log('goodsDate  '+goodsDate);
-    console.log('assetid  '+assetid);
+    console.log('assetName  '+assetName);
+    console.log('quotations  '+quotations);
+    console.log('reason  '+reason);
+    console.log('pricing  '+pricing);
+    console.log('deliveryPlace  '+deliveryPlace);
+    console.log('deliveryTime  '+deliveryTime);
+    console.log('deliveryCost  '+deliveryCost);
+    console.log('attachment  '+attachment);
+    
+
     if(closurePlanDate==''){
         console.log('plan');
         closurePlanDate='1970-01-02';
@@ -253,31 +356,92 @@ router.post('/updateasset',(request,response)=>{
     }
 
     console.log('goodsDate'+goodsDate);
-    if(paymentStatus=='Released'){
-        if(status!='' && payement!='' && receiverName!='' && receivedQuantity!=''){
-            console.log('VAlidation passed for RELEASED payments');
-            let updateQuerry = 'UPDATE salesforce.Asset_Requisition_Form__c SET '+
+    let updateQuerry = 'UPDATE salesforce.Asset_Requisition_Form__c SET '+
     'Name = \''+assetName+'\', '+
     'Requested_Closure_Actual_Date__c = \''+closureActualDate+'\', '+
     'Requested_Closure_Plan_Date__c = \''+closurePlanDate+'\', '+
-    'Activity_Code__c = \''+activityCode+'\', '+
-    'Payment_Status__c = \''+paymentStatus+'\', '+
+    'Activity_Code_Project__c = \''+activityCode+'\', '+
+    'p_o_attachment__c = \''+attachment+'\', '+
+   // 'Payment_Status__c = \''+paymentStatus+'\', '+
     'Status__c = \''+status+'\', '+
     'Payment_Received_Acknowledgement__c = \''+payement+'\', '+
     'Receiver_Name__c = \''+receiverName+'\', '+
+    'if_3_quotations_specify_reason__c= \''+quotations+'\', '+
+    'reason_for_non_registered_gst_Vendor__c= \''+reason+'\', '+
+    'pricing_terms_cost_comparison__c= \''+pricing+'\', '+
+    'delivery_terms_delivery_place__c= \''+deliveryPlace+'\', '+
+    'delivery_terms_delivery_time__c= \''+deliveryTime+'\', '+
+    'delivery_cost_incl__c= \''+deliveryCost+'\', '+
     'Received_Quantity_Goods__c= \''+receivedQuantity+'\', '+
     'Date_of_Receiving_Goods__c= \''+goodsDate+'\' '+
     'WHERE sfid = $1';
     console.log('updateQuerry '+updateQuerry);
-   pool.query(updateQuerry,[assetid])
-   .then((queryResultUpdate)=>{
-       console.log('queryResultUpdate '+JSON.stringify(queryResultUpdate));
-       response.send('succesfully inserted');
-   }).catch((eroor)=>{console.log(JSON.stringify(eroor.stack))})
 
-        }
-        else{ response.send('fill all fields');}
+    var payPass='';
+    var attchPass='';
+    if(paymentStatus=='Released'){
+        if(status=='Closed'){
+            payPass='true';
+            console.log('status :'+status+' paymetStatus :'+paymentStatus+' payPass:'+payPass);
+        }   
     }
+    else{
+        if(status!='Closed'){
+            payPass='false';
+        }
+    }
+    if(attachment!=null && attachment!=''){
+        console.log('reason '+reason+' quotations:'+quotations+' pricing:'+pricing+' deliveryPlace:'+deliveryPlace+' deliveryTime:'+deliveryTime+' deliveryCost:'+deliveryCost);
+        if(reason=='true' && quotations =='true' && pricing=='true'  && deliveryPlace!='' && deliveryTime!='' && deliveryCost!='' ){
+            attchPass='true';
+            console.log('attchPass '+attchPass);
+        }
+    }
+
+    if(attachment==null || attachment=='' ){  
+        if(payPass=='true' || payPass=='false'){
+        console.log('******');
+        pool.query(updateQuerry,[assetsfid])
+        .then((queryResultUpdate)=>{
+         console.log('queryResultUpdate '+JSON.stringify(queryResultUpdate));
+         response.send('succesfully Update!');
+        }).catch((eroor)=>{console.log(JSON.stringify(eroor.stack))})
+     }
+     else{
+         response.send('Choose Status Closed only When payment is Released ')
+     }
+    
+    }
+    else{
+        console.log('@@@@@');
+        if(attchPass=='true'){
+            if(payPass=='true' || payPass=='false'){
+                console.log('@@@@@1111');
+                pool.query(updateQuerry,[assetsfid])
+                .then((queryResultUpdate)=>{
+                console.log('queryResultUpdate '+JSON.stringify(queryResultUpdate));
+                response.send('succesfully Update!');
+                }).catch((eroor)=>{console.log(JSON.stringify(eroor.stack))})   
+            }
+            else{
+                response.send('Choose Status Closed only When payment is Released !!!')
+
+            }
+           
+        }  
+        else{
+            response.send('Please fill all field in Purchase Order Checklist');
+        }        
+    }
+
+
+})
+
+
+
+   
+    
+    /* 
     else if(paymentStatus=='Rejected'){
         if(status=='' && payement=='' && receiverName=='' && receivedQuantity==''){
             console.log('VAlidation passed for REJECTED payments');
@@ -285,12 +449,19 @@ router.post('/updateasset',(request,response)=>{
     'Name = \''+assetName+'\', '+
     'Requested_Closure_Actual_Date__c = \''+closureActualDate+'\', '+
     'Requested_Closure_Plan_Date__c = \''+closurePlanDate+'\', '+
-    'Activity_Code__c = \''+activityCode+'\', '+
-    'Payment_Status__c = \''+paymentStatus+'\', '+
+    'Activity_Code_Project__c = \''+activityCode+'\', '+
+    'p_o_attachment__c = \''+attachment+'\', '+
+  //  'Payment_Status__c = \''+paymentStatus+'\', '+
     'Status__c = \''+status+'\', '+
     'Payment_Received_Acknowledgement__c = \''+payement+'\', '+
     'Receiver_Name__c = \''+receiverName+'\', '+
     'Received_Quantity_Goods__c= \''+receivedQuantity+'\', '+
+    'if_3_quotations_specify_reason__c= \''+quotations+'\', '+
+    'reason_for_non_registered_gst_Vendor__c= \''+reason+'\', '+
+    'pricing_terms_cost_comparison__c= \''+pricing+'\', '+
+    'delivery_terms_delivery_place__c= \''+deliveryPlace+'\', '+
+    'delivery_terms_delivery_time__c= \''+deliveryTime+'\', '+
+    'delivery_cost_incl__c= \''+deliveryCost+'\', '+
     'Date_of_Receiving_Goods__c= \''+goodsDate+'\' '+
     'WHERE sfid = $1';
     console.log('updateQuerry '+updateQuerry);
@@ -302,13 +473,13 @@ router.post('/updateasset',(request,response)=>{
 
         }
         else{response.send('LEAVE raiser fields blank')}
-
+ 
     }
     else {
         response.send('Updates error ');
     }
+    */
     
-})
 
 
 
@@ -1196,7 +1367,6 @@ router.post('/sendProcurementApproval',(request, response) => {
     'isSentForApprovalFromHeroku__c = true , '+
     'Heroku_Approval_Comment__c = $1 '+
     'WHERE sfid = $2';
-
     pool
     .query(updateProcurementQuery,[body.comment, body.assetRequisitionFormId])
     .then((requisitionQueryResult) =>{
@@ -1657,10 +1827,10 @@ router.post('/uploadFiless',(request,response)=>{
     const { imgpath,hide}=request.body;
     console.log('hide '+hide);
     console.log('imgpath '+imgpath);
-    var poattachment='Yes';
+   // var poattachment='Yes';
 
     let updateQuerry = 'UPDATE salesforce.Asset_Requisition_Form__c SET '+
-    'P_O_attachment__c = \''+poattachment+'\', '+
+    //'P_O_attachment__c = \''+poattachment+'\', '+
     'PO_Attachment_URL__c = \''+imgpath+'\' '+
     'WHERE sfid = $1';
     console.log('updateQuerry '+updateQuerry);
